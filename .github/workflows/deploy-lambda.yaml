@@ -19,7 +19,7 @@ jobs:
         python-version: '3.10'
 
     - name: Zip Lambda Function
-      run: zip -r function.zip hello_world.py
+      run: zip -r function.zip git_hub_actions_test/hello_world.py
 
     - name: Upload to AWS Lambda
       env:
@@ -27,4 +27,4 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        aws lambda update-function-code --function-name lambda_functions --zip-file fileb://function.zip
+        aws lambda update-function-code --function-name git_hub_actions_test --zip-file fileb://function.zip
