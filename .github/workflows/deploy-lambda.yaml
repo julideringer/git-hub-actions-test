@@ -19,7 +19,7 @@ jobs:
         python-version: '3.10'
 
     - name: Zip Lambda Function
-      run: zip -r function.zip hello_world.py
+      run: zip -r function.zip git_hub_actions_test/hello_world.py
 
     - name: Upload to AWS Lambda
       env:
