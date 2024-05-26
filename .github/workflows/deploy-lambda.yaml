@@ -3,7 +3,7 @@ name: Deploy Lambda Functions
 on:
   push:
     branches:
-      - main  # Cambia esto a la rama en la que quieras activar la acción
+      - main
 
 jobs:
   deploy:
@@ -18,11 +18,11 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Find Lambda directories
-      id: find_lambdas
+    - name: List Lambda Directories
+      id: list_directories
       run: |
-        # Encuentra todas las subcarpetas dentro del directorio lambdas
-        ls lambdas/* -d > lambda_dirs.txt
+        # Busca todas las subcarpetas en la carpeta lambdas
+        find lambdas -mindepth 1 -maxdepth 1 -type d -printf '%f\n' > lambda_directories.txt
 
     - name: Deploy Lambda Functions
       env:
@@ -30,15 +30,15 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        # Itera sobre cada subcarpeta encontrada
-        while read lambda_dir; do
-          # Extrae el nombre de la Lambda (nombre de la carpeta)
-          lambda_name=$(basename $lambda_dir)
+        # Itera sobre cada carpeta encontrada
+        while read -r lambda_dir; do
+          # Define el nombre de la función Lambda como el nombre de la carpeta
+          lambda_name="$lambda_dir"
           echo "Deploying $lambda_name"
 
           # Crea el archivo ZIP para la Lambda
-          zip -r ${lambda_name}.zip ${lambda_dir}/hello_world.py
+          zip -r "${lambda_name}.zip" "lambdas/${lambda_name}/hello_world.py"
 
           # Sube el archivo ZIP a AWS Lambda
-          aws lambda update-function-code --function-name $lambda_name --zip-file fileb://${lambda_name}.zip
-        done < lambda_dirs.txt
+          aws lambda update-function-code --function-name "$lambda_name" --zip-file "fileb://${lambda_name}.zip"
+        done < lambda_directories.txt
