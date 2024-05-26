@@ -40,7 +40,7 @@ jobs:
           echo "Deploying $lambda_name"
 
           # Crea el archivo ZIP para la Lambda
-          zip -r "${lambda_name}.zip" "$lambda_file"
+          zip -r "${lambda_name}.zip" "${lambda_dir}/hello_world.py"
 
           # Sube el archivo ZIP a AWS Lambda
           aws lambda update-function-code --function-name "$lambda_name" --zip-file "fileb://${lambda_name}.zip"
