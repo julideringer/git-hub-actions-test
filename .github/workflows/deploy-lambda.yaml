@@ -28,7 +28,7 @@ jobs:
       - name: Identify Changed Lambda Functions
         id: identify_changed_functions
         run: |
-          git diff --name-only HEAD^ HEAD lambdas > ../changed_files.txt
+          git diff --name-only $(git rev-list --max-parents=0 HEAD) HEAD lambdas > ../changed_files.txt || true
 
       - name: Deploy Lambda Functions
         env:
