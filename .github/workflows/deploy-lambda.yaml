@@ -32,12 +32,15 @@ jobs:
       run: |
         # Itera sobre cada carpeta encontrada
         while read -r lambda_dir; do
+          # Define la ruta completa del archivo de la función Lambda
+          lambda_file="lambdas/${lambda_dir}/hello_world.py"
           # Define el nombre de la función Lambda como el nombre de la carpeta
-          lambda_name="$lambda_dir"
+          lambda_name="${lambda_dir}"
+
           echo "Deploying $lambda_name"
 
           # Crea el archivo ZIP para la Lambda
-          zip -r "${lambda_name}.zip" "lambdas/${lambda_name}/hello_world.py"
+          zip -r "${lambda_name}.zip" "$lambda_file"
 
           # Sube el archivo ZIP a AWS Lambda
           aws lambda update-function-code --function-name "$lambda_name" --zip-file "fileb://${lambda_name}.zip"
