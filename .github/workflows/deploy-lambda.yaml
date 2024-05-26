@@ -35,7 +35,7 @@ jobs:
         # Itera sobre cada carpeta encontrada
         while read -r lambda_dir; do
           # Define la ruta completa del archivo de la función Lambda
-          lambda_file="${lambda_dir}/hello_world.py"
+          lambda_file="hello_world.py"
           # Define el nombre de la función Lambda como el nombre de la carpeta
           lambda_name="${lambda_dir}"
 
