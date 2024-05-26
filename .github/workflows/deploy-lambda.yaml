@@ -1,4 +1,4 @@
-name: Deploy Lambda Function
+name: Deploy Lambda Functions
 
 on:
   push:
@@ -18,13 +18,27 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Zip Lambda Function
-      run: zip -r function.zip git_hub_actions_test/hello_world.py
+    - name: Find Lambda directories
+      id: find_lambdas
+      run: |
+        # Encuentra todas las subcarpetas dentro del directorio lambdas
+        ls lambdas/* -d > lambda_dirs.txt
 
-    - name: Upload to AWS Lambda
+    - name: Deploy Lambda Functions
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        aws lambda update-function-code --function-name git_hub_actions_test --zip-file fileb://function.zip
+        # Itera sobre cada subcarpeta encontrada
+        while read lambda_dir; do
+          # Extrae el nombre de la Lambda (nombre de la carpeta)
+          lambda_name=$(basename $lambda_dir)
+          echo "Deploying $lambda_name"
+
+          # Crea el archivo ZIP para la Lambda
+          zip -r ${lambda_name}.zip ${lambda_dir}/lambda_function.py
+
+          # Sube el archivo ZIP a AWS Lambda
+          aws lambda update-function-code --function-name $lambda_name --zip-file fileb://${lambda_name}.zip
+        done < lambda_dirs.txt
