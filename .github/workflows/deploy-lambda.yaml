@@ -22,7 +22,7 @@ jobs:
       id: list_directories
       run: |
         cd lambdas
-        # Busca todas las subcarpetas en el directorio actual
+        # Busca todas las subcarpetas en el directorio actual y guarda la lista en lambda_directories.txt
         find . -mindepth 1 -maxdepth 1 -type d -printf '%f\n' > ../lambda_directories.txt
 
     - name: Deploy Lambda Functions
@@ -31,6 +31,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
+        cd lambdas
         # Itera sobre cada carpeta encontrada
         while read -r lambda_dir; do
           # Define la ruta completa del archivo de la función Lambda
