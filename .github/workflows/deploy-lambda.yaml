@@ -21,8 +21,9 @@ jobs:
     - name: List Lambda Directories
       id: list_directories
       run: |
-        # Busca todas las subcarpetas en la carpeta lambdas
-        find lambdas -mindepth 1 -maxdepth 1 -type d -printf '%f\n' > lambda_directories.txt
+        cd lambdas
+        # Busca todas las subcarpetas en el directorio actual
+        find . -mindepth 1 -maxdepth 1 -type d -printf '%f\n' > ../lambda_directories.txt
 
     - name: Deploy Lambda Functions
       env:
@@ -33,15 +34,15 @@ jobs:
         # Itera sobre cada carpeta encontrada
         while read -r lambda_dir; do
           # Define la ruta completa del archivo de la función Lambda
-          lambda_file="lambdas/${lambda_dir}/hello_world.py"
+          lambda_file="${lambda_dir}/hello_world.py"
           # Define el nombre de la función Lambda como el nombre de la carpeta
           lambda_name="${lambda_dir}"
 
           echo "Deploying $lambda_name"
 
           # Crea el archivo ZIP para la Lambda
-          zip -r "${lambda_name}.zip" "${lambda_dir}/hello_world.py"
+          zip -r "${lambda_name}.zip" "$lambda_file"
 
           # Sube el archivo ZIP a AWS Lambda
           aws lambda update-function-code --function-name "$lambda_name" --zip-file "fileb://${lambda_name}.zip"
-        done < lambda_directories.txt
+        done < ../lambda_directories.txt
