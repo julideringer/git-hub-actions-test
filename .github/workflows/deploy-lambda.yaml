@@ -18,44 +18,35 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: List Lambda Directories
-        id: list_directories
-        run: |
-          cd lambdas
-          # Busca todas las subcarpetas en el directorio actual y guarda la lista en lambda_directories.txt
-          find . -mindepth 1 -maxdepth 1 -type d -printf '%f\n' > ../lambda_directories.txt
-
       - name: Identify Changed Lambda Functions
         id: identify_changed_functions
         run: |
-          git diff --name-only $(git rev-list --max-parents=0 HEAD) HEAD lambdas > ../changed_files.txt || true
+          # Identifica los archivos cambiados en la última confirmación en la carpeta 'lambdas'
+          git diff --name-only HEAD~1 HEAD lambdas/ > changed_files.txt
 
-      - name: Deploy Lambda Functions
+      - name: Deploy Changed Lambda Functions
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          cd lambdas
-          # Itera sobre cada carpeta encontrada
-          while read -r lambda_dir; do
-            # Define el nombre de la función Lambda como el nombre de la carpeta
-            lambda_name="${lambda_dir}"
+          # Filtra y despliega las funciones Lambda que han tenido cambios
+          while read -r changed_file; do
+            # Extrae el nombre del directorio Lambda del archivo cambiado
+            lambda_dir=$(dirname "$changed_file")
+            lambda_name=$(basename "$lambda_dir")
 
-            # Verifica si la función Lambda ha sido modificada
-            if grep -q "${lambda_dir}/" ../changed_files.txt; then
-              echo "Deploying $lambda_name"
-              
-              # Cambia al directorio de la función Lambda
-              cd "$lambda_dir"
+            echo "Deploying $lambda_name"
 
-              # Crea el archivo ZIP para la Lambda
-              zip -r "../${lambda_name}.zip" "hello_world.py"
+            # Cambia al directorio de la función Lambda
+            cd "$lambda_dir"
 
-              # Regresa al directorio principal
-              cd ..
+            # Crea el archivo ZIP para la Lambda
+            zip -r "../${lambda_name}.zip" "lambda_function.py"
 
-              # Sube el archivo ZIP a AWS Lambda
-              aws lambda update-function-code --function-name "$lambda_name" --zip-file "fileb://${lambda_name}.zip"
-            fi
-          done < ../lambda_directories.txt
+            # Regresa al directorio principal
+            cd ..
+
+            # Sube el archivo ZIP a AWS Lambda
+            aws lambda update-function-code --function-name "$lambda_name" --zip-file "fileb://${lambda_name}.zip"
+          done < changed_files.txt
