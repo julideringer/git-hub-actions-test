@@ -51,17 +51,17 @@ jobs:
           lambda_name="${lambda_dir}"
           echo "Deploying $lambda_name"
           
-          # Verifica si el directorio existe y contiene el archivo lambda_function.py
-          if [ -d "$lambda_dir" ] && [ -f "$lambda_dir/lambda_function.py" ]; then
+          # Verifica si el directorio existe y contiene el archivo hello_world.py
+          if [ -d "$lambda_dir" ] && [ -f "$lambda_dir/hello_world.py" ]; then
             # Cambia al directorio de la función Lambda
             cd "$lambda_dir"
             # Crea el archivo ZIP para la Lambda
-            zip -r "../${lambda_name}.zip" "lambda_function.py"
+            zip -r "../${lambda_name}.zip" "hello_world.py"
             # Regresa al directorio principal
             cd ..
             # Sube el archivo ZIP a AWS Lambda
             aws lambda update-function-code --function-name "$lambda_name" --zip-file "fileb://${lambda_name}.zip"
           else
-            echo "Warning: Directory $lambda_dir does not exist or does not contain lambda_function.py"
+            echo "Warning: Directory $lambda_dir does not exist or does not contain hello_world.py"
           fi
         done < ../changed_lambdas.txt
