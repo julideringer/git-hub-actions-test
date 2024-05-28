@@ -23,12 +23,17 @@ jobs:
       run: |
         # Verifica si hay al menos un commit previo
         if [ $(git rev-list --count HEAD) -gt 1 ]; then
+          echo "Identifying changed files since the last commit."
           # Identifica los archivos cambiados en la última confirmación
           git diff --name-only HEAD~1 HEAD lambdas/ > changed_files.txt
         else
+          echo "No previous commits found. Listing all files."
           # Si no hay commits previos, lista todos los archivos en lambdas/
           find lambdas -type f > changed_files.txt
         fi
+
+        echo "Changed files:"
+        cat changed_files.txt
 
         # Extrae los directorios únicos de las funciones Lambda que han cambiado
         awk -F'/' '{print $2}' changed_files.txt | sort | uniq > changed_lambdas.txt
@@ -53,6 +58,7 @@ jobs:
           
           # Verifica si el directorio existe y contiene el archivo hello_world.py
           if [ -d "$lambda_dir" ] && [ -f "$lambda_dir/hello_world.py" ]; then
+            echo "Found $lambda_dir with hello_world.py"
             # Cambia al directorio de la función Lambda
             cd "$lambda_dir"
             # Crea el archivo ZIP para la Lambda
