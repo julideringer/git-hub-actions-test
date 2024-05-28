@@ -21,8 +21,13 @@ jobs:
     - name: Identify Changed Lambda Functions
       id: identify_changed_functions
       run: |
-        # Identifica los archivos cambiados en la última confirmación
-        git diff --name-only HEAD~1 HEAD lambdas/ > changed_files.txt
+        # Verifica si hay al menos un commit previo
+        if [ $(git rev-list --count HEAD) -gt 1 ]; then
+          # Identifica los archivos cambiados en la última confirmación
+          git diff --name-only HEAD~1 HEAD lambdas/ > changed_files.txt
+        else
+          # Si no hay commits previos, lista todos los archivos en lambdas/
+          find lambdas -type f > changed_files.txt
 
         # Extrae los directorios únicos de las funciones Lambda que han cambiado
         awk -F'/' '{print $2}' changed_files.txt | sort | uniq > changed_lambdas.txt
@@ -50,12 +55,4 @@ jobs:
             # Cambia al directorio de la función Lambda
             cd "$lambda_dir"
             # Crea el archivo ZIP para la Lambda
-            zip -r "../${lambda_name}.zip" "lambda_function.py"
-            # Regresa al directorio principal
-            cd ..
-            # Sube el archivo ZIP a AWS Lambda
-            aws lambda update-function-code --function-name "$lambda_name" --zip-file "fileb://${lambda_name}.zip"
-          else
-            echo "Warning: Directory $lambda_dir does not exist or does not contain lambda_function.py"
-          fi
-        done < ../changed_lambdas.txt
+            zip -r "../${lambda_name}.zip
