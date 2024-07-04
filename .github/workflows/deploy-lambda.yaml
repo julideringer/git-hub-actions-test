@@ -27,50 +27,35 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Check if git_hub_actions_test Changed
-      id: check_git_hub_actions_test
+    - name: Find and Deploy Changed Lambda Functions
       run: |
-        if git diff --name-only HEAD^ HEAD | grep -q '^lambdas/git_hub_actions_test/'; then
-          echo "changed=true" >> $GITHUB_ENV
-        else
-          echo "changed=false" >> $GITHUB_ENV
-        fi
-
-    - name: Deploy git_hub_actions_test Lambda
-      if: env.changed == 'true'
-      run: |
-        LAMBDA_FUNCTION_NAME=git_hub_actions_test
-        ZIP_FILE_NAME=git_hub_actions_test.zip
-        # Change to the directory containing the Lambda function
-        cd lambdas/git_hub_actions_test
-        # Zip the contents of the current directory (without including the directory itself)
-        zip -r ../../$ZIP_FILE_NAME .
-        cd ../..
-        # Update the Lambda function code
-        aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://$ZIP_FILE_NAME
-        # Cleanup
-        rm $ZIP_FILE_NAME
-
-    - name: Check if git_hub_actions_test_aux Changed
-      id: check_git_hub_actions_test_aux
-      run: |
-        if git diff --name-only HEAD^ HEAD | grep -q '^lambdas/git_hub_actions_test_aux/'; then
-          echo "changed=true" >> $GITHUB_ENV
-        else
-          echo "changed=false" >> $GITHUB_ENV
-        fi
-
-    - name: Deploy git_hub_actions_test_aux Lambda
-      if: env.changed == 'true'
-      run: |
-        LAMBDA_FUNCTION_NAME=git_hub_actions_test_aux
-        ZIP_FILE_NAME=git_hub_actions_test_aux.zip
-        # Change to the directory containing the Lambda function
-        cd lambdas/git_hub_actions_test_aux
-        # Zip the contents of the current directory (without including the directory itself)
-        zip -r ../../$ZIP_FILE_NAME .
-        cd ../..
-        # Update the Lambda function code
-        aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://$ZIP_FILE_NAME
-        # Cleanup
-        rm $ZIP_FILE_NAME
+        # Find all the Lambda function directories that have changes
+        changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^lambdas/' | cut -d '/' -f 2-3 | uniq)
+        echo "Changed Lambda Directories: $changed_lambdas"
+        for lambda in $changed_lambdas; do
+          # Extract the directory and function name from the path
+          dir_name=$(echo $lambda | cut -d '/' -f 1)
+          function_name=$(echo $lambda | cut -d '/' -f 2)
+          zip_file_name=${function_name}.zip
+          
+          # Only proceed if there are Python files that have changed
+          if git diff --name-only HEAD^ HEAD | grep -q "^lambdas/${dir_name}/${function_name}/.*\.py$"; then
+            echo "Changes detected in Lambda function: $function_name"
+            # Change to the directory containing the Lambda function
+            cd lambdas/$dir_name/$function_name
+            
+            # Zip the contents of the current directory (without including the directory itself)
+            zip -r ../../../$zip_file_name .
+            
+            # Go back to the root directory
+            cd ../../../
+            
+            # Update the Lambda function code
+            aws lambda update-function-code --function-name $function_name --zip-file fileb://$zip_file_name
+            
+            # Cleanup
+            rm $zip_file_name
+          else
+            echo "No Python file changes detected in $function_name, skipping deployment."
+          fi
+        done
