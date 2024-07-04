@@ -22,7 +22,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-west-2 # Modify this to your desired AWS region
+        aws-region: eu-west-1 # Modify this to your desired AWS region
 
     - name: Print changed files # To properly debug what is being deployed (It can be removed).
       run: |
