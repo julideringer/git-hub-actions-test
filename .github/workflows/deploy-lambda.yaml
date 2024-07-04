@@ -1,64 +1,53 @@
-name: Deploy Lambda Functions
+name: Deploy Python Lambda
 
 on:
   push:
     branches:
       - main
+    paths:
+      - '**.py' # Change to the file extension of the language that you are using.
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 2 # To fetch the current commit and its parent (so we can compare)
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.10'
+    - name: Setup AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-2 # Modify this to your desired AWS region
 
-      - name: Identify Changed Lambda Directories
-        id: identify_changed_directories
-        run: |
-          # Verifica si hay al menos un commit previo
-          if [ $(git rev-list --count HEAD) -gt 1 ]; then
-            echo "Identifying changed directories since the last commit."
-            # Identifica los directorios cambiados en la última confirmación
-            git diff --name-only HEAD~1 HEAD lambdas/ > changed_files.txt
-          else
-            echo "No previous commits found. Listing all directories."
-            # Si no hay commits previos, lista todos los directorios en lambdas/
-            find lambdas -mindepth 1 -maxdepth 1 -type d > changed_files.txt
-          fi
+    - name: Print changed files # To properly debug what is being deployed (It can be removed).
+      run: |
+        echo "List of changed files:" 
+        echo $(git diff --name-only HEAD^ HEAD)
 
-          echo "Changed directories:"
-          cat changed_files.txt
+    - name: Deploy git_hub_actions_test Lambda
+      run: |
+        LAMBDA_FUNCTION_NAME=git_hub_actions_test
+        ZIP_FILE_NAME=git_hub_actions_test.zip
+        # Zip the contents of the git_hub_actions_test directory
+        zip -r $ZIP_FILE_NAME git_hub_actions_test
+        # Update the Lambda function code
+        aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://$ZIP_FILE_NAME
+        # Cleanup
+        rm $ZIP_FILE_NAME
 
-      - name: Print Changed Lambda Directories (Debugging Step)
-        run: |
-          echo "Changed Lambda Directories:"
-          cat changed_files.txt
+    - name: Deploy git_hub_actions_test_aux Lambda
+      run: |
+        LAMBDA_FUNCTION_NAME=git_hub_actions_test_aux
+        ZIP_FILE_NAME=git_hub_actions_test_aux.zip
+        # Zip the contents of the git_hub_actions_test_aux directory
+        zip -r $ZIP_FILE_NAME git_hub_actions_test_aux
+        # Update the Lambda function code
+        aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://$ZIP_FILE_NAME
+        # Cleanup
+        rm $ZIP_FILE_NAME
 
-      - name: Deploy Lambda Functions
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-        run: |
-          cd lambdas
-          # Itera sobre cada directorio de Lambda que ha cambiado
-          cat ../changed_files.txt | while read -r lambda_dir; do
-            echo "Deploying $lambda_dir"
-            
-            # Verifica si el directorio existe y contiene el archivo hello_world.py
-            if [ -d "$lambda_dir" ] && [ -f "$lambda_dir/hello_world.py" ]; then
-              echo "Found $lambda_dir with hello_world.py"
-              # Crea el archivo ZIP para la Lambda
-              zip -r "../${lambda_dir}.zip" "$lambda_dir/hello_world.py"
-              # Sube el archivo ZIP a AWS Lambda
-              aws lambda update-function-code --function-name "$lambda_dir" --zip-file "fileb://../${lambda_dir}.zip"
-            else
-              echo "Warning: Directory $lambda_dir does not exist or does not contain hello_world.py"
-            fi
-          done
