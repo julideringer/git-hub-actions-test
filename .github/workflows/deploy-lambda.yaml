@@ -41,8 +41,11 @@ jobs:
       run: |
         LAMBDA_FUNCTION_NAME=git_hub_actions_test
         ZIP_FILE_NAME=git_hub_actions_test.zip
-        # Zip the contents of the lambdas/git_hub_actions_test directory
-        zip -r $ZIP_FILE_NAME lambdas/git_hub_actions_test
+        # Change to the directory containing the Lambda function
+        cd lambdas/git_hub_actions_test
+        # Zip the contents of the current directory (without including the directory itself)
+        zip -r ../../$ZIP_FILE_NAME .
+        cd ../..
         # Update the Lambda function code
         aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://$ZIP_FILE_NAME
         # Cleanup
@@ -62,8 +65,11 @@ jobs:
       run: |
         LAMBDA_FUNCTION_NAME=git_hub_actions_test_aux
         ZIP_FILE_NAME=git_hub_actions_test_aux.zip
-        # Zip the contents of the lambdas/git_hub_actions_test_aux directory
-        zip -r $ZIP_FILE_NAME lambdas/git_hub_actions_test_aux
+        # Change to the directory containing the Lambda function
+        cd lambdas/git_hub_actions_test_aux
+        # Zip the contents of the current directory (without including the directory itself)
+        zip -r ../../$ZIP_FILE_NAME .
+        cd ../..
         # Update the Lambda function code
         aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://$ZIP_FILE_NAME
         # Cleanup
