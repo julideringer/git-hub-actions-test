@@ -15,7 +15,7 @@ jobs:
       with:
         fetch-depth: 2 # To fetch the current commit and its parent (so we can compare)
 
-    - name: Print changed files # To properly debug what is being deployed (It can be removed).
+    - name: Print changed files # Para depuración
       run: |
         echo "List of changed files:" 
         echo $(git diff --name-only HEAD^ HEAD)
@@ -27,7 +27,17 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
+    - name: Check if git_hub_actions_test Changed
+      id: check_git_hub_actions_test
+      run: |
+        if git diff --name-only HEAD^ HEAD | grep -q '^lambdas/git_hub_actions_test/'; then
+          echo "changed=true" >> $GITHUB_ENV
+        else
+          echo "changed=false" >> $GITHUB_ENV
+        fi
+
     - name: Deploy git_hub_actions_test Lambda
+      if: env.changed == 'true'
       run: |
         LAMBDA_FUNCTION_NAME=git_hub_actions_test
         ZIP_FILE_NAME=git_hub_actions_test.zip
@@ -38,7 +48,17 @@ jobs:
         # Cleanup
         rm $ZIP_FILE_NAME
 
+    - name: Check if git_hub_actions_test_aux Changed
+      id: check_git_hub_actions_test_aux
+      run: |
+        if git diff --name-only HEAD^ HEAD | grep -q '^lambdas/git_hub_actions_test_aux/'; then
+          echo "changed=true" >> $GITHUB_ENV
+        else
+          echo "changed=false" >> $GITHUB_ENV
+        fi
+
     - name: Deploy git_hub_actions_test_aux Lambda
+      if: env.changed == 'true'
       run: |
         LAMBDA_FUNCTION_NAME=git_hub_actions_test_aux
         ZIP_FILE_NAME=git_hub_actions_test_aux.zip
