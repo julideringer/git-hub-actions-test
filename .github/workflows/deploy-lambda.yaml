@@ -20,16 +20,19 @@ jobs:
         echo "List of changed files:" 
         echo $(git diff --name-only HEAD^ HEAD)
 
-    - name: Deploy Lambda Functions
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
+    - name: Setup AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Deploy git_hub_actions_test Lambda
       run: |
         LAMBDA_FUNCTION_NAME=git_hub_actions_test
         ZIP_FILE_NAME=git_hub_actions_test.zip
-        # Zip the contents of the git_hub_actions_test directory
-        zip -r $ZIP_FILE_NAME git_hub_actions_test
+        # Zip the contents of the lambdas/git_hub_actions_test directory
+        zip -r $ZIP_FILE_NAME lambdas/git_hub_actions_test
         # Update the Lambda function code
         aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://$ZIP_FILE_NAME
         # Cleanup
@@ -39,10 +42,9 @@ jobs:
       run: |
         LAMBDA_FUNCTION_NAME=git_hub_actions_test_aux
         ZIP_FILE_NAME=git_hub_actions_test_aux.zip
-        # Zip the contents of the git_hub_actions_test_aux directory
-        zip -r $ZIP_FILE_NAME git_hub_actions_test_aux
+        # Zip the contents of the lambdas/git_hub_actions_test_aux directory
+        zip -r $ZIP_FILE_NAME lambdas/git_hub_actions_test_aux
         # Update the Lambda function code
         aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --zip-file fileb://$ZIP_FILE_NAME
         # Cleanup
         rm $ZIP_FILE_NAME
-
