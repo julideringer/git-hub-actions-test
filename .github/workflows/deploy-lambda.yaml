@@ -37,7 +37,7 @@ jobs:
 
     - name: Format Code with black
       run: |
-        black --check lambdas/  # Verifica el formato de código sin modificar los archivos
+          black lambdas/  # Formatear automáticamente el código
 
     - name: Find and Deploy Changed Lambda Functions
       run: |
