@@ -29,7 +29,8 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        pip install flake8 black  # Instala flake8 para chequeo de estilo y black para formateo
+        pip install flake8 black pytest pytest-cov coverage  # Asegúrate de incluir coverage aquí
+
 
     - name: Check Code Style with flake8
       run: |
