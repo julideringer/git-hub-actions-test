@@ -39,6 +39,22 @@ jobs:
       run: |
           black lambdas/  # Formatear automáticamente el código
 
+    
+    - name: Run Tests with Coverage
+      run: |
+            coverage run -m pytest
+            coverage report -m
+            coverage report | tee coverage.txt
+    
+    - name: Check Coverage
+      run: |
+            threshold=80
+            coverage_percentage=$(coverage report | tail -n +3 | awk '{ print $NF }' | grep -vE '^$' | sed 's/%//')
+            if (( $(echo "$coverage_percentage < $threshold" | bc -l) )); then
+              echo "Coverage threshold not met: $coverage_percentage%"
+              exit 1
+            fi
+
     - name: Find and Deploy Changed Lambda Functions
       run: |
         # Find all the Lambda function directories that have changes
