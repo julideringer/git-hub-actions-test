@@ -27,6 +27,18 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
+    - name: Install Dependencies
+      run: |
+        pip install flake8 black  # Instala flake8 para chequeo de estilo y black para formateo
+
+    - name: Check Code Style with flake8
+      run: |
+        flake8 lambdas/  # Ajusta el directorio según donde se encuentren tus funciones Lambda
+
+    - name: Format Code with black
+      run: |
+        black --check lambdas/  # Verifica el formato de código sin modificar los archivos
+
     - name: Find and Deploy Changed Lambda Functions
       run: |
         # Find all the Lambda function directories that have changes
