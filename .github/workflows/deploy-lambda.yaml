@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
 
 jobs:
   deploy:
@@ -13,61 +14,56 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v2
       with:
-        fetch-depth: 2 # To fetch the current commit and its parent (so we can compare)
+        fetch-depth: 2
 
-    - name: Print changed files # Para depuración
+    - name: Print changed files
       run: |
         echo "List of changed files:" 
         echo $(git diff --name-only HEAD^ HEAD)
 
-    - name: Setup AWS CLI
+    - name: Set AWS Credentials Based on Branch
+      if: github.ref == 'refs/heads/main' # Para producción
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
+    - name: Set AWS Credentials Based on Branch
+      if: github.ref == 'refs/heads/develop' # Para desarrollo
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: ${{ secrets.AWS_REGION_DEV }}
+
     - name: Install Dependencies
       run: |
-        pip install flake8 black pytest pytest-cov coverage  # Asegúrate de incluir coverage aquí
-
+        pip install flake8 black pytest pytest-cov coverage
 
     - name: Check Code Style with flake8
       run: |
-        flake8 lambdas/  # Ajusta el directorio según donde se encuentren tus funciones Lambda
+        flake8 lambdas/
 
     - name: Format Code with black
       run: |
-          black lambdas/  # Formatear automáticamente el código
-
+        black lambdas/
 
     - name: Find and Deploy Changed Lambda Functions
       run: |
-        # Find all the Lambda function directories that have changes
         changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^lambdas/' | cut -d '/' -f 2-3 | uniq)
         echo "Changed Lambda Directories: $changed_lambdas"
         for lambda in $changed_lambdas; do
-          # Extract the directory and function name from the path
           dir_name=$(echo $lambda | cut -d '/' -f 1)
           function_name=$(echo $lambda | cut -d '/' -f 2)
           zip_file_name=${function_name}.zip
-          
-          # Only proceed if there are Python files that have changed
+
           if git diff --name-only HEAD^ HEAD | grep -q "^lambdas/${dir_name}/${function_name}/.*\.py$"; then
             echo "Changes detected in Lambda function: $function_name"
-            # Change to the directory containing the Lambda function
             cd lambdas/$dir_name/$function_name
-            
-            # Zip the contents of the current directory (without including the directory itself)
             zip -r ../../../$zip_file_name .
-            
-            # Go back to the root directory
             cd ../../../
-            
-            # Update the Lambda function code
             aws lambda update-function-code --function-name $function_name --zip-file fileb://$zip_file_name
-            
-            # Cleanup
             rm $zip_file_name
           else
             echo "No Python file changes detected in $function_name, skipping deployment."
