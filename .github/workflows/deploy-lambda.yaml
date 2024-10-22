@@ -62,10 +62,7 @@ jobs:
     - name: Create or Update Lambda function
       run: |
                 if [ "$exists" == "true" ]; then
-                  echo "Updating existing Lambda function"
-                  aws lambda update-function-code \
-                    --function-name publish_trips_test \
-                    --zip-file fileb://src/lambda_function.zip
+                  echo "No se crea la lambda"
                 else
                   echo "Creating new Lambda function"
                   aws lambda create-function \
