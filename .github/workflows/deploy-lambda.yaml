@@ -52,13 +52,11 @@ jobs:
         if ! aws lambda get-function --function-name $LAMBDA_NAME; then
           echo "Creating Lambda Function: $LAMBDA_NAME"
           aws lambda create-function \
-            --function-name $LAMBDA_NAME \
-            --runtime python3.10 \  # Cambia a la versión de runtime que necesites
-            --role arn:aws:lambda:us-west-2:123456789012:function:publish_trips \  # Verifica que el ARN del rol sea correcto
-            --handler publish_trips_test.lambda_handler \  # Asegúrate de que esto coincida con tu archivo y función
-            --zip-file fileb://lambda_function.zip \
-            --timeout 15 \  # Establece un timeout si es necesario
-            --memory-size 128  # Ajusta la memoria si es necesario
+          --function-name my-function \
+          --runtime nodejs10.x \
+          --zip-file fileb://my-function.zip \
+          --handler my-function.handler \
+          --role arn:aws:iam::123456789012:role/service-role/MyTestFunction-role-tges6bf4
         else
           echo "Function $LAMBDA_NAME already exists. Exiting..."
         fi
