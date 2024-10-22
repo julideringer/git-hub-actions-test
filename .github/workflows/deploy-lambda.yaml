@@ -41,22 +41,30 @@ jobs:
       run: |
         pip install flake8 black pytest pytest-cov coverage
 
-    - name: Create ZIP for Lambda
-      run: |
-          # Cambia al directorio que contiene tu archivo
-          cd src/trips/
-          # Crea el archivo ZIP
-          zip -r ../lambda_function.zip publish_trips_test.py
-          # Lista los archivos en el directorio padre para verificar que el ZIP se ha creado
-          ls -l ../
+        - name: Check if Lambda function exists
+        id: check-lambda
+        run: |
+          if aws lambda get-function --function-name publish_trips_test; then
+            echo "exists=true" >> $GITHUB_ENV
+          else
+            echo "exists=false" >> $GITHUB_ENV
+          fi
 
-    - name: Create Lambda function
+    - name: Create or Update Lambda function
       run: |
-          aws lambda create-function \
-            --function-name publish_trips_test \
-            --zip-file fileb://src/lambda_function.zip \
-            --handler src.trips.publish_trips_test.lambda_handler \
-            --runtime python3.10 \
-            --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \
-            --timeout 30 \
-            --memory-size 128
+          if [ "$GITHUB_ENV" == "exists=true" ]; then
+            echo "Updating existing Lambda function"
+            aws lambda update-function-code \
+              --function-name publish_trips_test \
+              --zip-file fileb://src/lambda_function.zip
+          else
+            echo "Creating new Lambda function"
+            aws lambda create-function \
+              --function-name publish_trips_test \
+              --zip-file fileb://src/lambda_function.zip \
+              --handler src.trips.publish_trips_test.lambda_handler \
+              --runtime python3.10 \
+              --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \
+              --timeout 30 \
+              --memory-size 128
+          fi
