@@ -41,77 +41,19 @@ jobs:
       run: |
         pip install flake8 black pytest pytest-cov coverage
 
-    - name: Find and Deploy Changed Lambda Functions
+     # 6. Desplegar la Lambda basada en el archivo publish_trips_test.py
+    - name: Deploy Lambda Function
       run: |
-          set -e  # Para que falle el script si hay algún error
-      
-          changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/' | grep '\.py$' | uniq)
-          echo "Changed Lambda Files: $changed_lambdas"
-          
-          if [ -z "$changed_lambdas" ]; then
-            echo "No changed Lambda files found."
-            exit 0  # Terminar si no hay cambios en los archivos Lambda
-          fi
-          
-          for lambda_file in $changed_lambdas; do
-            function_name=$(basename $lambda_file .py)  # Extrae el nombre del archivo como nombre de la lambda
-            zip_file_name=${function_name}.zip
-            handler_name=$(basename $lambda_file .py).lambda_handler  # El nombre del handler es el archivo sin .py seguido de .lambda_handler
-      
-            echo "Processing Lambda function: $function_name"
-            echo "Handler: $handler_name"
-            echo "Zipping function..."
-      
-            # Navegar a la carpeta donde está el archivo
-            file_dir=$(dirname $lambda_file)
-            cd $file_dir || exit 1  # Salir si no puede navegar a la carpeta
-            zip -r ../../../$zip_file_name .
-            cd ../../../
-      
-            # Comprobar si la Lambda ya existe
-            echo "Checking if Lambda function $function_name exists..."
-            lambda_exists=$(aws lambda get-function --function-name $function_name 2>&1 || echo "not-found")
-            echo "Lambda check result: $lambda_exists"
-      
-            if [[ $lambda_exists == *"not-found"* ]]; then
-              echo "Lambda function $function_name does not exist, creating it..."
-              
-              # Crear la Lambda si no existe
-              create_output=$(aws lambda create-function \
-                --function-name $function_name \
-                --runtime python3.9 \
-                --role arn:aws:iam::<your-iam-role-arn> \
-                --handler $handler_name \
-                --zip-file fileb://$zip_file_name \
-                --timeout 10 \
-                --memory-size 128 2>&1)
-      
-              echo "Create output: $create_output"
-              
-              if [[ $create_output == *"error"* ]]; then
-                echo "Failed to create Lambda function $function_name"
-                exit 1
-              fi
-      
-            else
-              echo "Lambda function $function_name exists, updating it..."
-              
-              # Actualizar el código de la Lambda si ya existe
-              update_output=$(aws lambda update-function-code \
-                --function-name $function_name \
-                --zip-file fileb://$zip_file_name 2>&1)
-      
-              echo "Update output: $update_output"
-      
-              if [[ $update_output == *"error"* ]]; then
-                echo "Failed to update Lambda function $function_name"
-                exit 1
-              fi
-            fi
-      
-            # Limpiar archivos temporales
-            echo "Cleaning up zip file $zip_file_name..."
-            rm $zip_file_name
-          done
+        LAMBDA_NAME="publish_trips"
+        echo "Deploying Lambda Function: $LAMBDA_NAME"
+
+        # Empaquetar el código y crear el archivo ZIP
+        zip -r9 lambda_function.zip src/trips/*
+
+        # Subir la Lambda a AWS
+        aws lambda update-function-code \
+          --function-name $LAMBDA_NAME \
+          --zip-file fileb://lambda_function.zip
+
       
       
