@@ -53,18 +53,22 @@ jobs:
     - name: Create or Update Lambda function
       run: |
           if [ "$GITHUB_ENV" == "exists=true" ]; then
-            echo "Updating existing Lambda function"
-            aws lambda update-function-code \
-              --function-name publish_trips_test \
-              --zip-file fileb://src/lambda_function.zip
+            echo "lambda_exist"
           else
             echo "Creating new Lambda function"
+            # Cambia al directorio que contiene tu archivo
+            cd src/trips/
+            # Crea el archivo ZIP
+            zip -r ../lambda_function.zip publish_trips_test.py
+            # Lista los archivos en el directorio padre para verificar que el ZIP se ha creado
+            ls -l ../
             aws lambda create-function \
-              --function-name publish_trips_test \
-              --zip-file fileb://src/lambda_function.zip \
-              --handler src.trips.publish_trips_test.lambda_handler \
-              --runtime python3.10 \
-              --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \
-              --timeout 30 \
-              --memory-size 128
+            --function-name publish_trips_test \
+            --zip-file fileb://src/lambda_function.zip \
+            --handler src.trips.publish_trips_test.lambda_handler \
+            --runtime python3.10 \
+            --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \
+            --timeout 30 \
+            --memory-size 128
           fi
+          
