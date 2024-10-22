@@ -41,28 +41,18 @@ jobs:
       run: |
         pip install flake8 black pytest pytest-cov coverage
 
-    - name: Check if Lambda function exists
-      id: check-lambda
+    - name: Create ZIP for Lambda
       run: |
-          if aws lambda get-function --function-name publish_trips_test; then
-            echo "exists=true" >> $GITHUB_ENV
-          else
-            echo "exists=false" >> $GITHUB_ENV
-          fi
+          # Cambia al directorio que contiene tu archivo
+          cd src/trips/
+          # Crea el archivo ZIP
+          zip -r ../lambda_function.zip publish_trips_test.py
+          # Lista los archivos en el directorio padre para verificar que el ZIP se ha creado
+          ls -l ../
 
-    - name: Create or Update Lambda function
+    - name: Create Lambda function
       run: |
-          if [ "$GITHUB_ENV" == "exists=true" ]; then
-            echo "lambda_exist"
-          else
-            echo "Creating new Lambda function"
-            # Cambia al directorio que contiene tu archivo
-            cd src/trips/
-            # Crea el archivo ZIP
-            zip -r ../lambda_function.zip publish_trips_test.py
-            # Lista los archivos en el directorio padre para verificar que el ZIP se ha creado
-            ls -l ../
-            aws lambda create-function \
+          aws lambda create-function \
             --function-name publish_trips_test \
             --zip-file fileb://src/lambda_function.zip \
             --handler src.trips.publish_trips_test.lambda_handler \
@@ -70,5 +60,3 @@ jobs:
             --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \
             --timeout 30 \
             --memory-size 128
-          fi
-          
