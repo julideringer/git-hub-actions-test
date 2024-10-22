@@ -43,17 +43,23 @@ jobs:
 
     - name: Package Lambda function
       run: |
-          mkdir -p package
-          cp -r src/trips/publish_trips_test.py package/  # Copia tu función a la carpeta de paquete
-          cd package
-          zip -r ../lambda_function.zip .  # Empaqueta la función Lambda
+        for lambda_file in $changed_lambdas; do
+        function_name=$(basename $lambda_file .py)  # Extrae el nombre del archivo como nombre de la lambda
+        zip_file_name=${function_name}.zip
+
+        echo "Changes detected in Lambda function: $function_name"
+        # Navegar a la carpeta donde está el archivo
+        file_dir=$(dirname $lambda_file)
+        cd $file_dir
+        zip -r ../../$zip_file_name .
+        cd ../../
 
     - name: Create Lambda function
       run: |
           aws lambda create-function \
-            --function-name publish_trips_test \
-            --zip-file fileb://lambda_function.zip \
-            --handler publish_trips_test.lambda_handler \  # Ajusta esto según tu función
+            --function-name $function_name \
+            --zip-file fileb://$zip_file_name \
+            --handler src.trips.publish_trips_test.lambda_handler \  # Ajusta esto según tu función
             --runtime python3.10 \  # O la versión que estés utilizando
             --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \  # Reemplaza con tu ARN de rol
             --timeout 30 \  # Ajusta según sea necesario
