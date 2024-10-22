@@ -47,6 +47,8 @@ jobs:
           cd src/trips/
           # Crea el archivo ZIP
           zip -r ../lambda_function.zip publish_trips_test.py
+          # Lista los archivos en el directorio padre para verificar que el ZIP se ha creado
+          ls -l ../
 
     - name: Create Lambda function
       run: |
