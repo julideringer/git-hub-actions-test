@@ -43,8 +43,15 @@ jobs:
 
     - name: Find and Deploy Changed Lambda Functions
       run: |
+          set -e  # Para que falle el script si hay algún error
+      
           changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/' | grep '\.py$' | uniq)
           echo "Changed Lambda Files: $changed_lambdas"
+          
+          if [ -z "$changed_lambdas" ]; then
+            echo "No changed Lambda files found."
+            exit 0  # Terminar si no hay cambios en los archivos Lambda
+          fi
           
           for lambda_file in $changed_lambdas; do
             function_name=$(basename $lambda_file .py)  # Extrae el nombre del archivo como nombre de la lambda
@@ -57,12 +64,15 @@ jobs:
       
             # Navegar a la carpeta donde está el archivo
             file_dir=$(dirname $lambda_file)
-            cd $file_dir
-            zip -r ../../$zip_file_name .
-            cd ../../
+            cd $file_dir || exit 1  # Salir si no puede navegar a la carpeta
+            zip -r ../../../$zip_file_name .
+            cd ../../../
       
             # Comprobar si la Lambda ya existe
+            echo "Checking if Lambda function $function_name exists..."
             lambda_exists=$(aws lambda get-function --function-name $function_name 2>&1 || echo "not-found")
+            echo "Lambda check result: $lambda_exists"
+      
             if [[ $lambda_exists == *"not-found"* ]]; then
               echo "Lambda function $function_name does not exist, creating it..."
               
@@ -70,7 +80,7 @@ jobs:
               create_output=$(aws lambda create-function \
                 --function-name $function_name \
                 --runtime python3.9 \
-                --role arn:aws:iam::682033485736:role/dev-role-mube \
+                --role arn:aws:iam::<your-iam-role-arn> \
                 --handler $handler_name \
                 --zip-file fileb://$zip_file_name \
                 --timeout 10 \
@@ -100,6 +110,8 @@ jobs:
             fi
       
             # Limpiar archivos temporales
+            echo "Cleaning up zip file $zip_file_name..."
             rm $zip_file_name
           done
+      
       
