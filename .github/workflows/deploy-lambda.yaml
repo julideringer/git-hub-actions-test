@@ -56,7 +56,24 @@ jobs:
           cd $file_dir
           zip -r ../../$zip_file_name .
           cd ../../
-          # Desplegar la función Lambda
-          aws lambda update-function-code --function-name $function_name --zip-file fileb://$zip_file_name
+
+          # Comprobar si la Lambda ya existe
+          lambda_exists=$(aws lambda get-function --function-name $function_name 2>&1 || echo "not-found")
+          if [[ $lambda_exists == *"not-found"* ]]; then
+            echo "Lambda function $function_name does not exist, creating it..."
+            aws lambda create-function \
+              --function-name $function_name \
+              --runtime python3.10 \
+              --role arn:aws:iam::682033485736:role/service-role/publish_trips_test-role-x5pm6b8b \
+              --handler $(basename $lambda_file .py).lambda_handler \
+              --zip-file fileb://$zip_file_name \
+              --timeout 10 \
+              --memory-size 128
+          else
+            echo "Lambda function $function_name exists, updating it..."
+            aws lambda update-function-code --function-name $function_name --zip-file fileb://$zip_file_name
+          fi
+
+          # Limpiar archivos temporales
           rm $zip_file_name
         done
