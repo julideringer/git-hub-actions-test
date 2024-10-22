@@ -116,9 +116,11 @@ jobs:
                   done
               }
       
-              # Verificar y crear funciones Lambda en los directorios 'src/trips' y 'src/routines'
+              # Verificar y crear funciones Lambda en el directorio 'src/trips'
               check_and_create_lambda "src/trips"
-              check_and_create_lambda "src/routines"
+    
+              # Verificar y crear funciones Lambda en el directorio 'src/routines'
+              check_and_create_lambda "../routines"
       
       
     - name: Print changed files
