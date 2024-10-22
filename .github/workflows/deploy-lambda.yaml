@@ -41,8 +41,8 @@ jobs:
       run: |
         pip install flake8 black pytest pytest-cov coverage
 
-        - name: Find and Deploy Changed Lambda Functions
-        run: |
+    - name: Find and Deploy Changed Lambda Functions
+      run: |
           changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/' | grep '\.py$' | uniq)
           echo "Changed Lambda Files: $changed_lambdas"
           
