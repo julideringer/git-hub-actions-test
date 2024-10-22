@@ -43,29 +43,28 @@ jobs:
 
     - name: Check Code Style with flake8
       run: |
-        flake8 lambdas/
+        flake8 src/
 
     - name: Format Code with black
       run: |
-        black lambdas/
+        black src/
 
     - name: Find and Deploy Changed Lambda Functions
       run: |
-        changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^lambdas/' | cut -d '/' -f 2-3 | uniq)
-        echo "Changed Lambda Directories: $changed_lambdas"
-        for lambda in $changed_lambdas; do
-          dir_name=$(echo $lambda | cut -d '/' -f 1)
-          function_name=$(echo $lambda | cut -d '/' -f 2)
+        changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/' | grep '\.py$' | uniq)
+        echo "Changed Lambda Files: $changed_lambdas"
+        
+        for lambda_file in $changed_lambdas; do
+          function_name=$(basename $lambda_file .py)  # Extrae el nombre del archivo como nombre de la lambda
           zip_file_name=${function_name}.zip
 
-          if git diff --name-only HEAD^ HEAD | grep -q "^lambdas/${dir_name}/${function_name}/.*\.py$"; then
-            echo "Changes detected in Lambda function: $function_name"
-            cd lambdas/$dir_name/$function_name
-            zip -r ../../../$zip_file_name .
-            cd ../../../
-            aws lambda update-function-code --function-name $function_name --zip-file fileb://$zip_file_name
-            rm $zip_file_name
-          else
-            echo "No Python file changes detected in $function_name, skipping deployment."
-          fi
+          echo "Changes detected in Lambda function: $function_name"
+          # Navegar a la carpeta donde está el archivo
+          file_dir=$(dirname $lambda_file)
+          cd $file_dir
+          zip -r ../../$zip_file_name .
+          cd ../../
+          # Desplegar la función Lambda
+          aws lambda update-function-code --function-name $function_name --zip-file fileb://$zip_file_name
+          rm $zip_file_name
         done
