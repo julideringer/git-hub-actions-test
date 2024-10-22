@@ -43,65 +43,82 @@ jobs:
 
     - name: Create ZIPs for Lambda functions
       run: |
-            cd src/trips/
-      
-            # Inicializa un array para almacenar los nombres de los archivos ZIP creados
-            zip_files=()
-      
-            # Recorre todos los archivos .py en el directorio
-            for lambda_file in *.py; do
-              # Extrae el nombre del archivo sin la extensión .py
-              function_name=$(basename $lambda_file .py)
-      
-              # Cambia el nombre del archivo a lambda_function.py temporalmente
-              mv $lambda_file lambda_function.py
+              # Inicializa un array para almacenar los nombres de los archivos ZIP creados
+              zip_files=()
               
-              # Crea el archivo ZIP con el nombre de la función
-              zip -r ../${function_name}.zip lambda_function.py
-              
-              # Devuelve el archivo a su nombre original
-              mv lambda_function.py $lambda_file
-              
-              # Agrega el nombre del ZIP al array
-              zip_files+=("${function_name}.zip")
-              
-              echo "Creado ZIP para $function_name"
-            done
+              # Función para crear ZIPs de funciones Lambda en un directorio dado
+              create_zip_files() {
+                  local dir=$1
+                  cd $dir
       
-            # Verificar que los archivos ZIP se crearon correctamente
-            ls -l ../
+                  # Recorre todos los archivos .py en el directorio
+                  for lambda_file in *.py; do
+                    # Extrae el nombre del archivo sin la extensión .py
+                    function_name=$(basename $lambda_file .py)
+      
+                    # Cambia el nombre del archivo a lambda_function.py temporalmente
+                    mv $lambda_file lambda_function.py
+                    
+                    # Crea el archivo ZIP con el nombre de la función
+                    zip -r ../${function_name}.zip lambda_function.py
+                    
+                    # Devuelve el archivo a su nombre original
+                    mv lambda_function.py $lambda_file
+                    
+                    # Agrega el nombre del ZIP al array
+                    zip_files+=("${function_name}.zip")
+                    
+                    echo "Creado ZIP para $function_name en $dir"
+                  done
+      
+                  # Verificar que los archivos ZIP se crearon correctamente
+                  ls -l ../
+              }
+      
+              # Crear ZIPs en los directorios 'src/trips' y 'src/routines'
+              create_zip_files "src/trips"
+              create_zip_files "src/routines"
       
     - name: Check and Create/Update Lambda functions
       run: |
-            cd src/trips/
+              # Función para verificar y crear funciones Lambda
+              check_and_create_lambda() {
+                  local dir=$1
+                  cd $dir
       
-            # Recorre todos los archivos .py en el directorio
-            for lambda_file in *.py; do
-              # Extrae el nombre de la función a partir del archivo
-              function_name=$(basename $lambda_file .py)
-              
-              # Verifica si la función Lambda ya existe en AWS
-              if aws lambda get-function --function-name $function_name > /dev/null 2>&1; then
-                echo "La función Lambda $function_name ya existe, no se crea de nuevo."
-              else
-                echo "Creando nueva función Lambda: $function_name"
-                # Verifica si el archivo ZIP existe antes de intentar usarlo
-                zip_file="../${function_name}.zip"
-                if [ -f "$zip_file" ]; then
-                  # Crear la nueva función Lambda
-                  aws lambda create-function \
-                    --function-name $function_name \
-                    --zip-file fileb://$zip_file \
-                    --handler lambda_function.lambda_handler \
-                    --runtime python3.10 \
-                    --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \
-                    --timeout 30 \
-                    --memory-size 128
-                else
-                  echo "Error: El archivo ZIP para $function_name no se encontró. No se puede crear la función Lambda."
-                fi
-              fi
-            done
+                  # Recorre todos los archivos .py en el directorio
+                  for lambda_file in *.py; do
+                    # Extrae el nombre de la función a partir del archivo
+                    function_name=$(basename $lambda_file .py)
+                    
+                    # Verifica si la función Lambda ya existe en AWS
+                    if aws lambda get-function --function-name $function_name > /dev/null 2>&1; then
+                      echo "La función Lambda $function_name ya existe, no se crea de nuevo."
+                    else
+                      echo "Creando nueva función Lambda: $function_name"
+                      # Verifica si el archivo ZIP existe antes de intentar usarlo
+                      zip_file="../${function_name}.zip"
+                      if [ -f "$zip_file" ]; then
+                        # Crear la nueva función Lambda
+                        aws lambda create-function \
+                          --function-name $function_name \
+                          --zip-file fileb://$zip_file \
+                          --handler lambda_function.lambda_handler \
+                          --runtime python3.10 \
+                          --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \
+                          --timeout 30 \
+                          --memory-size 128
+                      else
+                        echo "Error: El archivo ZIP para $function_name no se encontró. No se puede crear la función Lambda."
+                      fi
+                    fi
+                  done
+              }
+      
+              # Verificar y crear funciones Lambda en los directorios 'src/trips' y 'src/routines'
+              check_and_create_lambda "src/trips"
+              check_and_create_lambda "src/routines"
+      
       
     - name: Print changed files
       run: |
