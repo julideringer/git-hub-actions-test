@@ -70,7 +70,7 @@ jobs:
               create_output=$(aws lambda create-function \
                 --function-name $function_name \
                 --runtime python3.9 \
-                --role arn:aws:iam::<your-iam-role-arn> \
+                --role arn:aws:iam::682033485736:role/dev-role-mube \
                 --handler $handler_name \
                 --zip-file fileb://$zip_file_name \
                 --timeout 10 \
