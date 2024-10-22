@@ -41,9 +41,12 @@ jobs:
       run: |
         pip install flake8 black pytest pytest-cov coverage
 
-    - name: Rename and Create ZIPs for Lambda functions
+    - name: Create ZIPs for Lambda functions
       run: |
             cd src/trips/
+      
+            # Inicializa un array para almacenar los nombres de los archivos ZIP creados
+            zip_files=()
       
             # Recorre todos los archivos .py en el directorio
             for lambda_file in *.py; do
@@ -59,47 +62,47 @@ jobs:
               # Devuelve el archivo a su nombre original
               mv lambda_function.py $lambda_file
               
-              # Lista los archivos ZIP creados
+              # Agrega el nombre del ZIP al array
+              zip_files+=("${function_name}.zip")
+              
               echo "Creado ZIP para $function_name"
             done
       
             # Verificar que los archivos ZIP se crearon correctamente
             ls -l ../
-
-    - name: Check if Lambda function exists
-      id: check-lambda
-      run: |
-          if aws lambda get-function --function-name publish_trips_test; then
-            echo "exists=true" >> $GITHUB_ENV
-          else
-            echo "exists=false" >> $GITHUB_ENV
-          fi
-
+      
     - name: Check and Create/Update Lambda functions
       run: |
-              cd src/trips/
-        
-              # Recorre todos los archivos .py en el directorio
-              for lambda_file in *.py; do
-                # Extrae el nombre de la función a partir del archivo
-                function_name=$(basename $lambda_file .py)
-                
-                # Verifica si la función Lambda ya existe en AWS
-                if aws lambda get-function --function-name $function_name > /dev/null 2>&1; then
-                  echo "La función Lambda $function_name ya existe, no se crea de nuevo."
-                else
-                  echo "Creando nueva función Lambda: $function_name"
+            cd src/trips/
+      
+            # Recorre todos los archivos .py en el directorio
+            for lambda_file in *.py; do
+              # Extrae el nombre de la función a partir del archivo
+              function_name=$(basename $lambda_file .py)
+              
+              # Verifica si la función Lambda ya existe en AWS
+              if aws lambda get-function --function-name $function_name > /dev/null 2>&1; then
+                echo "La función Lambda $function_name ya existe, no se crea de nuevo."
+              else
+                echo "Creando nueva función Lambda: $function_name"
+                # Verifica si el archivo ZIP existe antes de intentar usarlo
+                zip_file="../${function_name}.zip"
+                if [ -f "$zip_file" ]; then
                   # Crear la nueva función Lambda
                   aws lambda create-function \
                     --function-name $function_name \
-                    --zip-file fileb://src/${function_name}.zip \
+                    --zip-file fileb://$zip_file \
                     --handler lambda_function.lambda_handler \
                     --runtime python3.10 \
                     --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \
                     --timeout 30 \
                     --memory-size 128
+                else
+                  echo "Error: El archivo ZIP para $function_name no se encontró. No se puede crear la función Lambda."
                 fi
-              done
+              fi
+            done
+      
     - name: Print changed files
       run: |
             echo "List of changed files:" 
