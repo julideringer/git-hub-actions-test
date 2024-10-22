@@ -76,3 +76,26 @@ jobs:
             --timeout 30 \
             --memory-size 128
           fi
+    - name: Print changed files
+      run: |
+            echo "List of changed files:" 
+            git diff --name-only HEAD^ HEAD
+    - name: Find and Deploy Changed Lambda Functions
+      run: |
+            changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/' | grep '\.py$' | uniq)
+            echo "Changed Lambda Files: $changed_lambdas"
+            
+            for lambda_file in $changed_lambdas; do
+              function_name=$(basename $lambda_file .py)  # Extrae el nombre del archivo como nombre de la lambda
+              zip_file_name=${function_name}.zip
+    
+              echo "Changes detected in Lambda function: $function_name"
+              # Navegar a la carpeta donde está el archivo
+              file_dir=$(dirname $lambda_file)
+              cd $file_dir
+              zip -r ../../$zip_file_name .
+              cd ../../
+              # Desplegar la función Lambda
+              aws lambda update-function-code --function-name $function_name --zip-file fileb://$zip_file_name
+              rm $zip_file_name
+            done
