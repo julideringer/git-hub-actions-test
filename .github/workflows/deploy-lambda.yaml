@@ -41,19 +41,26 @@ jobs:
       run: |
         pip install flake8 black pytest pytest-cov coverage
 
-     # 6. Desplegar la Lambda basada en el archivo publish_trips_test.py
-    - name: Deploy Lambda Function
+    # 3. Crear la función Lambda
+    - name: Create Lambda Function
       run: |
         LAMBDA_NAME="publish_trips"
-        echo "Deploying Lambda Function: $LAMBDA_NAME"
-
+        
         # Empaquetar el código y crear el archivo ZIP
         zip -r9 lambda_function.zip src/trips/*
 
-        # Subir la Lambda a AWS
-        aws lambda update-function-code \
-          --function-name $LAMBDA_NAME \
-          --zip-file fileb://lambda_function.zip
+        # Crear la función Lambda si no existe
+        if ! aws lambda get-function --function-name $LAMBDA_NAME; then
+          echo "Creating Lambda Function: $LAMBDA_NAME"
+          aws lambda create-function \
+            --function-name $LAMBDA_NAME \
+            --runtime python3.10 \  # Cambia a la versión de runtime que necesites
+            --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \
+            --handler your_lambda_file.lambda_handler \  # Cambia esto según tu archivo y función
+            --zip-file fileb://lambda_function.zip
+        else
+          echo "Function $LAMBDA_NAME already exists. Exiting..."
+        fi
 
       
       
