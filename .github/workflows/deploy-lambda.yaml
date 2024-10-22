@@ -73,11 +73,12 @@ jobs:
       
                   # Verificar que los archivos ZIP se crearon correctamente
                   ls -l ../
+                  cd ..
               }
       
               # Crear ZIPs en los directorios 'src/trips' y 'src/routines'
               create_zip_files "src/trips"
-              create_zip_files "src/routines"
+              create_zip_files "routines"
       
     - name: Check and Create/Update Lambda functions
       run: |
