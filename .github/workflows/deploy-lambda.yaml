@@ -43,37 +43,63 @@ jobs:
 
     - name: Find and Deploy Changed Lambda Functions
       run: |
-        changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/' | grep '\.py$' | uniq)
-        echo "Changed Lambda Files: $changed_lambdas"
-        
-        for lambda_file in $changed_lambdas; do
-          function_name=$(basename $lambda_file .py)  # Extrae el nombre del archivo como nombre de la lambda
-          zip_file_name=${function_name}.zip
-
-          echo "Changes detected in Lambda function: $function_name"
-          # Navegar a la carpeta donde está el archivo
-          file_dir=$(dirname $lambda_file)
-          cd $file_dir
-          zip -r ../../$zip_file_name .
-          cd ../../
-
-          # Comprobar si la Lambda ya existe
-          lambda_exists=$(aws lambda get-function --function-name $function_name 2>&1 || echo "not-found")
-          if [[ $lambda_exists == *"not-found"* ]]; then
-            echo "Lambda function $function_name does not exist, creating it..."
-            aws lambda create-function \
-              --function-name $function_name \
-              --runtime python3.10 \
-              --role arn:aws:iam::682033485736:role/service-role/publish_trips_test-role-x5pm6b8b \
-              --handler $(basename $lambda_file .py).lambda_handler \
-              --zip-file fileb://$zip_file_name \
-              --timeout 10 \
-              --memory-size 128
-          else
-            echo "Lambda function $function_name exists, updating it..."
-            aws lambda update-function-code --function-name $function_name --zip-file fileb://$zip_file_name
-          fi
-
-          # Limpiar archivos temporales
-          rm $zip_file_name
-        done
+          changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/' | grep '\.py$' | uniq)
+          echo "Changed Lambda Files: $changed_lambdas"
+          
+          for lambda_file in $changed_lambdas; do
+            function_name=$(basename $lambda_file .py)  # Extrae el nombre del archivo como nombre de la lambda
+            zip_file_name=${function_name}.zip
+            handler_name=$(basename $lambda_file .py).lambda_handler  # El nombre del handler es el archivo sin .py seguido de .lambda_handler
+      
+            echo "Processing Lambda function: $function_name"
+            echo "Handler: $handler_name"
+            echo "Zipping function..."
+      
+            # Navegar a la carpeta donde está el archivo
+            file_dir=$(dirname $lambda_file)
+            cd $file_dir
+            zip -r ../../$zip_file_name .
+            cd ../../
+      
+            # Comprobar si la Lambda ya existe
+            lambda_exists=$(aws lambda get-function --function-name $function_name 2>&1 || echo "not-found")
+            if [[ $lambda_exists == *"not-found"* ]]; then
+              echo "Lambda function $function_name does not exist, creating it..."
+              
+              # Crear la Lambda si no existe
+              create_output=$(aws lambda create-function \
+                --function-name $function_name \
+                --runtime python3.9 \
+                --role arn:aws:iam::<your-iam-role-arn> \
+                --handler $handler_name \
+                --zip-file fileb://$zip_file_name \
+                --timeout 10 \
+                --memory-size 128 2>&1)
+      
+              echo "Create output: $create_output"
+              
+              if [[ $create_output == *"error"* ]]; then
+                echo "Failed to create Lambda function $function_name"
+                exit 1
+              fi
+      
+            else
+              echo "Lambda function $function_name exists, updating it..."
+              
+              # Actualizar el código de la Lambda si ya existe
+              update_output=$(aws lambda update-function-code \
+                --function-name $function_name \
+                --zip-file fileb://$zip_file_name 2>&1)
+      
+              echo "Update output: $update_output"
+      
+              if [[ $update_output == *"error"* ]]; then
+                echo "Failed to update Lambda function $function_name"
+                exit 1
+              fi
+            fi
+      
+            # Limpiar archivos temporales
+            rm $zip_file_name
+          done
+      
