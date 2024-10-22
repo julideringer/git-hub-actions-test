@@ -32,6 +32,7 @@ def parser_to_camel_case(raw_item):
 
 def lambda_handler(event, context= None):
     """lambda handler"""
+    print("hola")
     body = parser_to_camel_case(event['body-json'])
     trip_id = str(uuid.uuid4())
     body['trip_id'] = trip_id
