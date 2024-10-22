@@ -55,11 +55,11 @@ jobs:
     - name: Check if Lambda function exists
       id: check-lambda
       run: |
-            if aws lambda get-function --function-name publish_trips_test; then
-              echo "exists=true" >> $GITHUB_ENV
-            else
-              echo "exists=false" >> $GITHUB_ENV
-            fi
+          if aws lambda get-function --function-name publish_trips_test; then
+            echo "exists=true" >> $GITHUB_ENV
+          else
+            echo "exists=false" >> $GITHUB_ENV
+          fi
 
     - name: Create or Update Lambda function
       run: |
