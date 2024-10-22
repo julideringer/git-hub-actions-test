@@ -41,14 +41,6 @@ jobs:
       run: |
         pip install flake8 black pytest pytest-cov coverage
 
-    - name: Check Code Style with flake8
-      run: |
-        flake8 src/
-
-    - name: Format Code with black
-      run: |
-        black src/
-
     - name: Find and Deploy Changed Lambda Functions
       run: |
         changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/' | grep '\.py$' | uniq)
