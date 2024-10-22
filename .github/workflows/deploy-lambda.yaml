@@ -41,7 +41,6 @@ jobs:
       run: |
         pip install flake8 black pytest pytest-cov coverage
 
-    # 3. Crear la función Lambda
     - name: Create Lambda Function
       run: |
         LAMBDA_NAME="publish_trips"
@@ -55,12 +54,11 @@ jobs:
           aws lambda create-function \
             --function-name $LAMBDA_NAME \
             --runtime python3.10 \  # Cambia a la versión de runtime que necesites
-            --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \
-            --handler your_lambda_file.lambda_handler \  # Cambia esto según tu archivo y función
-            --zip-file fileb://lambda_function.zip
+            --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \  # Verifica que el ARN del rol sea correcto
+            --handler publish_trips_test.lambda_handler \  # Asegúrate de que esto coincida con tu archivo y función
+            --zip-file fileb://lambda_function.zip \
+            --timeout 15 \  # Establece un timeout si es necesario
+            --memory-size 128  # Ajusta la memoria si es necesario
         else
           echo "Function $LAMBDA_NAME already exists. Exiting..."
         fi
-
-      
-      
