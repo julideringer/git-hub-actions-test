@@ -135,20 +135,40 @@ jobs:
             git diff --name-only HEAD^ HEAD
     - name: Find and Deploy Changed Lambda Functions
       run: |
-            changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/' | grep '\.py$' | uniq)
-            echo "Changed Lambda Files: $changed_lambdas"
-            
-            for lambda_file in $changed_lambdas; do
-              function_name=$(basename $lambda_file .py)  # Extrae el nombre del archivo como nombre de la lambda
-              zip_file_name=${function_name}.zip
-    
-              echo "Changes detected in Lambda function: $function_name"
-              # Navegar a la carpeta donde está el archivo
-              file_dir=$(dirname $lambda_file)
-              cd $file_dir
-              zip -r ../../$zip_file_name .
-              cd ../../
-              # Desplegar la función Lambda
-              aws lambda update-function-code --function-name $function_name --zip-file fileb://$zip_file_name
-              rm $zip_file_name
-            done
+                  # Encuentra los archivos .py que cambiaron
+                  changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/' | grep '\.py$' | uniq)
+                  echo "Changed Lambda Files: $changed_lambdas"
+                  
+                  for lambda_file in $changed_lambdas; do
+                    # Extrae el nombre del archivo como nombre de la lambda
+                    function_name=$(basename $lambda_file .py)
+                    zip_file_name=${function_name}.zip
+                    lambda_dir=$(dirname $lambda_file)
+                    
+                    echo "Changes detected in Lambda function: $function_name"
+                    
+                    # Crea una carpeta temporal para empaquetar solo lo necesario
+                    mkdir -p /tmp/${function_name}_package
+                    
+                    # Copia la función Lambda específica a la carpeta temporal
+                    cp $lambda_file /tmp/${function_name}_package/
+                    
+                    # Copia las dependencias necesarias (por ejemplo, trips_tools) a la carpeta temporal
+                    cp -r src/trips_tools /tmp/${function_name}_package/
+                    cp -r src/common_tools /tmp/${function_name}_package/
+                    
+                    # Empaqueta todo en un archivo ZIP
+                    cd /tmp/${function_name}_package
+                    zip -r ../../$zip_file_name .
+                    
+                    # Volver a la carpeta raíz del repositorio
+                    cd ../../
+                    
+                    # Desplegar la función Lambda con el archivo ZIP
+                    aws lambda update-function-code --function-name $function_name --zip-file fileb://$zip_file_name
+                    
+                    # Limpia el directorio temporal y el archivo ZIP
+                    rm -rf /tmp/${function_name}_package
+                    rm $zip_file_name
+                  done
+          
