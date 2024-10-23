@@ -155,6 +155,7 @@ jobs:
                     
                     # Copia las dependencias necesarias (por ejemplo, trips_tools) a la carpeta temporal
                     cp -r src/trips_tools /tmp/${function_name}_package/
+                    cp -r src/common_tools /tmp/${function_name}_package/
                     
                     # Empaqueta todo en un archivo ZIP en el directorio temporal
                     cd /tmp/${function_name}_package

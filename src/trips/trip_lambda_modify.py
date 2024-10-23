@@ -12,6 +12,7 @@ users_table = boto3.resource("dynamodb").Table('users')
 
 def lambda_handler(event, context= None):
     """lambda handler"""
+    print("hola")
     trip_id = event['body-json']['tripId']
     origen = event['body-json']['departureLocation']
     destino = event['body-json']['arrivalLocation']
