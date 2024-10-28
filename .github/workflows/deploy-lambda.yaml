@@ -58,22 +58,4 @@ jobs:
           }'
   
           # Crear el rol
-          aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document "$TRUST_POLICY"
-  
-          # Adjuntar política al rol
-          aws iam put-role-policy --role-name $ROLE_NAME --policy-name MyRolePolicy --policy-document '{
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Action": [
-                  "s3:Get*",
-                  "s3:List*",
-                  "s3:Describe*",
-                  "s3-object-lambda:Get*",
-                  "s3-object-lambda:List*"
-                ],
-                "Resource": "*"
-              }
-            ]
-          }'
+          aws iam create-role --role-name Test-Role --assume-role-policy-document file://trust-policy.json
