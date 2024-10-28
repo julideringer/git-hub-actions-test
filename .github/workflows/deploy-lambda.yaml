@@ -58,4 +58,4 @@ jobs:
           }'
   
           # Crear el rol
-          aws iam create-role --role-name Test-Role --assume-role-policy-document file://trust-policy.json
+          aws iam create-role --role-name Test-Role --assume-role-policy-document file:///Users/julianmontoroangosto/mube/mube/git-hub-actions-test/src/trust-policy.json
