@@ -43,19 +43,8 @@ jobs:
 
     - name: Create IAM Role
       run: |
-          ROLE_NAME="MyNewRole"  # Cambia esto al nombre deseado
-          TRUST_POLICY='{
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": "ec2.amazonaws.com"  # Cambia esto según sea necesario
-                },
-                "Action": "sts:AssumeRole"
-              }
-            ]
-          }'
+          ROLE_NAME="MyNewRoletest"  # Cambia esto al nombre deseado
   
           # Crear el rol
           aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://src/trust-policy.json
+          aws iam put-role-policy --role-name $ROLE_NAME --policy-name s3ReadOnlyTest --policy-document file://src/permission_role.json
