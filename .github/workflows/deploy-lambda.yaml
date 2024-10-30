@@ -41,10 +41,155 @@ jobs:
       run: |
         pip install flake8 black pytest pytest-cov coverage
 
-    - name: Create IAM Role
+    - name: Create ZIPs for Lambda functions
       run: |
-          ROLE_NAME="MyNewRoletest"  # Cambia esto al nombre deseado
-  
-          # Crear el rol
-          aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://src/trust-policy.json
-          aws iam put-role-policy --role-name $ROLE_NAME --policy-name s3ReadOnlyTest --policy-document file://src/permission_role.json
+              # Inicializa un array para almacenar los nombres de los archivos ZIP creados
+              zip_files=()
+              
+              # Función para crear ZIPs de funciones Lambda en un directorio dado
+              create_zip_files() {
+                  local dir=$1
+                  cd $dir
+      
+                  # Recorre todos los archivos .py en el directorio
+                  for lambda_file in *.py; do
+                    # Extrae el nombre del archivo sin la extensión .py
+                    function_name=$(basename $lambda_file .py)
+      
+                    # Cambia el nombre del archivo a lambda_function.py temporalmente
+                    mv $lambda_file lambda_function.py
+                    
+                    # Crea el archivo ZIP con el nombre de la función
+                    zip -r ../${function_name}.zip lambda_function.py
+                    
+                    # Devuelve el archivo a su nombre original
+                    mv lambda_function.py $lambda_file
+
+                    # Crea el archivo ZIP incluyendo las dependencias en trips_tools/
+                    zip -r ../${function_name}.zip lambda_function.py ../trips_tools/
+
+                    # Crea el archivo ZIP incluyendo las dependencias en trips_tools/
+                    zip -r ../${function_name}.zip lambda_function.py ../common_tools/
+                    
+                    # Agrega el nombre del ZIP al array
+                    zip_files+=("${function_name}.zip")
+                    
+                    echo "Creado ZIP para $function_name en $dir"
+                  done
+      
+                  # Verificar que los archivos ZIP se crearon correctamente
+                  ls -l ../
+                  cd ..
+              }
+      
+              # Crear ZIPs en los directorios 'src/trips' y 'src/routines'
+              create_zip_files "src/trips"
+              create_zip_files "routines"
+      
+    - name: Check and Create/Update Lambda functions
+      run: |
+              # Función para verificar y crear funciones Lambda
+              check_and_create_lambda() {
+                  local dir=$1
+                  cd $dir
+      
+                  # Recorre todos los archivos .py en el directorio
+                  for lambda_file in *.py; do
+                    # Extrae el nombre de la función a partir del archivo
+                    function_name=$(basename $lambda_file .py)
+                    
+                    # Verifica si la función Lambda ya existe en AWS
+                    if aws lambda get-function --function-name $function_name > /dev/null 2>&1; then
+                      echo "La función Lambda $function_name ya existe, no se crea de nuevo."
+                    else
+                      echo "Creando nueva función Lambda: $function_name"
+                      # Verifica si el archivo ZIP existe antes de intentar usarlo
+                      zip_file="../${function_name}.zip"
+                      if [ -f "$zip_file" ]; then
+                        # Lee el archivo permission_lambda.json
+                        permission_json="../permission_lambda.json"
+                        # Extrae la política del archivo JSON si el nombre de la Lambda coincide
+                        policy=$(jq -c ".lambdas[\"$function_name\"]" "$permission_json")
+                        if [ "$policy" != "null" ]; then
+                          # Define el nombre del rol asociado a esta Lambda
+                          role_name="${function_name}_role"
+
+                          # Verifica si el rol ya existe
+                          if aws iam get-role --role-name "$role_name" >/dev/null 2>&1; then
+                            echo "El rol $role_name ya existe, no se crea de nuevo."
+                          else
+                            echo "Creando el rol $role_name para $function_name"
+
+                            # Crea el rol con la política de confianza para Lambda
+                            aws iam create-role --role-name "$role_name" --assume-role-policy-document file://trust-policy.json
+
+                            # Asocia la política extraída al rol
+                            aws iam put-role-policy --role-name "$role_name" --policy-name "${function_name}_policy" --policy-document "$policy"
+                          fi
+
+                        # Crear la nueva función Lambda
+                        aws lambda create-function \
+                          --function-name $function_name \
+                          --zip-file fileb://$zip_file \
+                          --handler lambda_function.lambda_handler \
+                          --runtime python3.10 \
+                          --role arn:aws:iam::682033485736:role/service-role/$role_name \
+                          --timeout 30 \
+                          --memory-size 128
+                      else
+                        echo "Error: El archivo ZIP para $function_name no se encontró. No se puede crear la función Lambda."
+                      fi
+                    fi
+                  done
+              }
+      
+              # Verificar y crear funciones Lambda en el directorio 'src/trips'
+              check_and_create_lambda "src/trips"
+    
+              # Verificar y crear funciones Lambda en el directorio 'src/routines'
+              check_and_create_lambda "../routines"
+      
+      
+    - name: Print changed files
+      run: |
+            echo "List of changed files:" 
+            git diff --name-only HEAD^ HEAD
+    - name: Find and Deploy Changed Lambda Functions
+      run: |
+                  # Encuentra los archivos .py que cambiaron
+                  changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/' | grep '\.py$' | uniq)
+                  echo "Changed Lambda Files: $changed_lambdas"
+                  
+                  for lambda_file in $changed_lambdas; do
+                    # Extrae el nombre del archivo como nombre de la lambda
+                    function_name=$(basename $lambda_file .py)
+                    zip_file_name="${function_name}.zip"
+                    lambda_dir=$(dirname $lambda_file)
+                    
+                    echo "Changes detected in Lambda function: $function_name"
+                    
+                    # Crea una carpeta temporal para empaquetar solo lo necesario
+                    mkdir -p /tmp/${function_name}_package
+                    
+                    # Copia la función Lambda específica a la carpeta temporal
+                    cp $lambda_file /tmp/${function_name}_package/
+                    
+                    # Copia las dependencias necesarias (por ejemplo, trips_tools) a la carpeta temporal
+                    cp -r src/trips_tools /tmp/${function_name}_package/
+                    cp -r src/common_tools /tmp/${function_name}_package/
+                    
+                    # Empaqueta todo en un archivo ZIP en el directorio temporal
+                    cd /tmp/${function_name}_package
+                    zip -r /tmp/$zip_file_name .
+                    
+                    # Volver a la carpeta raíz del repositorio
+                    cd -
+                    
+                    # Desplegar la función Lambda con el archivo ZIP
+                    aws lambda update-function-code --function-name $function_name --zip-file fileb:///tmp/$zip_file_name
+                    
+                    # Limpia el directorio temporal y el archivo ZIP
+                    rm -rf /tmp/${function_name}_package
+                    rm /tmp/$zip_file_name
+                  done
+          
