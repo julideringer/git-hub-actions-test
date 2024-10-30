@@ -190,19 +190,31 @@ jobs:
 
                   # Comparar las acciones
                   if [ "$current_actions" != "$previous_actions" ]; then
-                      changed_lambdas+=("$lambda")
+                      changed_lambdas_permission+=("$lambda")
                   fi
               done
-
-              # Mostrar las lambdas que han cambiado
-              if [ ${#changed_lambdas[@]} -ne 0 ]; then
+              
+              # Mostrar las lambdas que han cambiado y actualizar sus roles
+              if [ ${#changed_lambdas_permission[@]} -ne 0 ]; then
                   echo "Las siguientes funciones Lambda han cambiado sus permisos:"
-                  for lambda in "${changed_lambdas[@]}"; do
-                      echo " - $lambda"
+                  for function_name in "${changed_lambdas_permission[@]}"; do
+                      echo " - $function_name"
+
+                      # Extrae la política del archivo JSON si el nombre de la Lambda coincide
+                      policy=$(jq -c ".lambdas[\"$function_name\"]" "$current_permissions_file")
+
+                      # Asocia la política extraída al rol
+                      if [ -n "$policy" ]; then
+                          aws iam put-role-policy --role-name "$function_name" --policy-name "${function_name}_policy" --policy-document "$policy"
+                          echo "Política actualizada para el rol de $function_name"
+                      else
+                          echo "Error: no se pudo extraer la política para $function_name"
+                      fi
                   done
               else
                   echo "No se encontraron cambios en los permisos de las funciones Lambda."
               fi
+
       
     - name: Print changed files
       run: |
