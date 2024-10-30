@@ -164,6 +164,9 @@ jobs:
                 # Realiza un diff para encontrar las diferencias
                 diff_output=$"diff src/permissions_lambda.json <(git show HEAD~1:src/permissions_lambda.json)"
                 echo "previous permission $diff_output"
+
+                # Procesar la salida del diff para encontrar las funciones Lambda que han cambiado
+                changed_lambdas=$(echo "$diff_output" | grep '^>' | grep -oP '"(\w+)":' | cut -d'"' -f2 | sort -u)
       
     - name: Print changed files
       run: |
