@@ -254,7 +254,7 @@ jobs:
 
                               # Recorrer el archivo zip_files.txt para desplegar funciones Lambda
                               echo "Desplegando funciones Lambda desde $zip_file_list:"
-                              while IFS= read -r zip_file_lambda; do
+                              for zip_file_lambda in $(cat "$zip_file_list"); do
                                 # Extrae el nombre del archivo como nombre de la lambda
                                 function_name=$(basename $zip_file_lambda .py)
                                 zip_file_name="${function_name}.zip"
