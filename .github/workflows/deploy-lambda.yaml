@@ -110,6 +110,10 @@ jobs:
                       # Verifica si el archivo ZIP existe antes de intentar usarlo
                       zip_file="../${function_name}.zip"
                       if [ -f "$zip_file" ]; then
+                        # Extrae la política del archivo JSON si el nombre de la Lambda coincide
+                        policy=$(jq -c ".lambdas[\"$function_name\"]" "$permission_json")
+                        # Muestra el valor de 'policy' en los logs
+                        echo "Policy para $function_name: $policy"
                         # Crear la nueva función Lambda
                         aws lambda create-function \
                           --function-name $function_name \
