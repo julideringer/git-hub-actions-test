@@ -97,7 +97,7 @@ jobs:
               create_zip_files "routines"
               # Imprime los archivos ZIP generados en la carpeta temporal
               echo "Archivos ZIP creados en /tmp/zip_file_lambda:"
-              ls /tmp/zip_file_lambda
+              cat /tmp/zip_file_lambda/zip_files.txt
       
     - name: Check and Create/Update Lambda functions
       run: |
