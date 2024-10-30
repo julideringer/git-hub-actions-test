@@ -40,6 +40,8 @@ jobs:
     - name: Install Dependencies
       run: |
         pip install flake8 black pytest pytest-cov coverage
+        sudo apt-get update
+        sudo apt-get install -y jq
 
     - name: Create ZIPs for Lambda functions
       run: |
@@ -88,6 +90,8 @@ jobs:
       
     - name: Check and Create/Update Lambda functions
       run: |
+              # Lee el archivo permission_lambda.json
+              permission_json="../permission_lambda.json"
               # Función para verificar y crear funciones Lambda
               check_and_create_lambda() {
                   local dir=$1
