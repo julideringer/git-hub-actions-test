@@ -255,14 +255,37 @@ jobs:
                               # Recorrer el archivo zip_files.txt para desplegar funciones Lambda
                               echo "Desplegando funciones Lambda desde $zip_file_list:"
                               while IFS= read -r zip_file_lambda; do
-                                # Extrae el nombre de la función a partir del nombre del archivo ZIP
-                                function_name=$(basename "$zip_file_lambda" .zip)
-
-                                echo "Se puede apreciar que pasa por aquí"
+                                # Extrae el nombre del archivo como nombre de la lambda
+                                function_name=$(basename $zip_file_lambda .py)
+                                zip_file_name="${function_name}.zip"
+                                lambda_dir=$(dirname $zip_file_lambda)
+                                
+                                echo "Changes detected in Lambda function: $function_name"
+                                
+                                # Crea una carpeta temporal para empaquetar solo lo necesario
+                                mkdir -p /tmp/${function_name}_package
+                                
+                                # Copia la función Lambda específica a la carpeta temporal
+                                cp $lambda_file /tmp/${function_name}_package/
+                                
+                                # Copia las dependencias necesarias (por ejemplo, trips_tools) a la carpeta temporal
+                                cp -r src/trips_tools /tmp/${function_name}_package/
+                                cp -r src/common_tools /tmp/${function_name}_package/
+                                
+                                # Empaqueta todo en un archivo ZIP en el directorio temporal
+                                cd /tmp/${function_name}_package
+                                zip -r /tmp/$zip_file_name .
+                                
+                                # Volver a la carpeta raíz del repositorio
+                                cd -
+                                
                                 # Desplegar la función Lambda con el archivo ZIP
-                                aws lambda update-function-code --function-name "$function_name" --zip-file "fileb://$temp_dir/$zip_file_lambda"
-                              done < "$zip_file_list"
-                            fi
+                                aws lambda update-function-code --function-name $function_name --zip-file fileb:///tmp/$zip_file_name
+                                
+                                # Limpia el directorio temporal y el archivo ZIP
+                                rm -rf /tmp/${function_name}_package
+                                rm /tmp/$zip_file_name
+                              done
           
           
 
