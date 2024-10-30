@@ -8,7 +8,7 @@ USERS_TABLE = 'users'
 users_table = boto3.resource("dynamodb").Table(USERS_TABLE)
 dynamodb = boto3.client("dynamodb")
 s3 = boto3.client('s3')
-print("hola3")
+print("hola4")
 def get_user_info_from_trips(trip_list):
     """method to get user info for a set of trips"""
     user_id_list = []
