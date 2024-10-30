@@ -75,6 +75,9 @@ jobs:
                     
                     # Agrega el nombre del ZIP al array
                     zip_files+=("${function_name}.zip")
+
+                    # Agrega el nombre del ZIP al archivo temporal
+                    echo "${function_name}.zip" >> "../$zip_file_list"
                     
                     echo "Creado ZIP para $function_name en $dir"
                   done
@@ -230,6 +233,8 @@ jobs:
 
     - name: Find and Deploy Changed Lambda Functions
       run: |
+                            # Leer los archivos ZIP desde el archivo temporal
+                            zip_files=$(<zip_files.txt)
                             changed_dependencies=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(common_tools|trips_tools)/' | grep '\.py$')
                             echo "MOSTRAMOS changed_dependencies: $changed_dependencies"
                             if [ -n "$changed_dependencies" ]; then
