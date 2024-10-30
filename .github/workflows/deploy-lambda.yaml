@@ -162,7 +162,7 @@ jobs:
               echo "Previous permissions: $previous_permissions_json"
 
               # Realiza un diff para encontrar las diferencias
-              diff_output=$(diff <(echo "$previous_permissions_json") <(cat "$current_permissions_file"))
+              diff_output=$"diff src/permissions_lambda.json <(git show HEAD~1:src/permissions_lambda.json)"
 
               # Mostrar diferencias
               echo "Diferencias encontradas:"
