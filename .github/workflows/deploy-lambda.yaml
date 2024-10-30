@@ -120,7 +120,7 @@ jobs:
                         echo "Policy para $function_name: $policy"
 
                         # Crea el rol con la política de confianza para Lambda
-                        aws iam create-role --role-name "$function_name" --assume-role-policy-document trust_policy_json
+                        aws iam create-role --role-name "$function_name" --assume-role-policy-document file://$trust_policy_json
 
                         # Asocia la política extraída al rol
                         aws iam put-role-policy --role-name "$function_name" --policy-name "${function_name}_policy" --policy-document "$policy"
