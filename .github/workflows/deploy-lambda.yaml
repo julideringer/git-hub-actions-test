@@ -248,7 +248,7 @@ jobs:
                                       echo "MOSTRAMOS changed_dependencies: $changed_dependencies"
 
                                       if [ -n "$changed_dependencies" ]; then
-                                          lambda_file_find=find src/routines src/trips -type f -name "*.py"
+                                          lambda_file_find=$(find src/routines src/trips -type f -name "*.py")
                                           echo "mostramos las todos los .py que se van a cambiar por cambiar funciones $lambda_file_find" 
                                           for lambda_file in $lambda_file_find; do
                                             # Extrae el nombre del archivo como nombre de la lambda
