@@ -242,13 +242,13 @@ jobs:
     - name: Find and Deploy Changed Lambda Functions
       run: |
                             # Leer los archivos ZIP desde el archivo temporal
-                            zip_files=$(<src/zip_file_list.txt)
+                            zip_file_lambdas=$(</tmp/zip_file_lambda/zip_files.txt)
                             changed_dependencies=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(common_tools|trips_tools)/' | grep '\.py$')
                             echo "MOSTRAMOS changed_dependencies: $changed_dependencies"
                             if [ -n "$changed_dependencies" ]; then
                               echo "Changed dependencies are present."
-                              echo "MOSTRAMOS LOS ZIP: $zip_files"
-                              for zip_file_lambda in $zip_files; do
+                              echo "MOSTRAMOS LOS ZIP: $zip_file_lambdas"
+                              for zip_file_lambda in $zip_file_lambdas; do
                                 echo "Se puede apreciar que pasa por aquí"
                                 # Desplegar la función Lambda con el archivo ZIP
                                 aws lambda update-function-code --function-name $function_name --zip-file fileb://$zip_file_lambda
