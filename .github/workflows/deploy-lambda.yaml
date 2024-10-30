@@ -50,6 +50,9 @@ jobs:
               # Crea una carpeta temporal para empaquetar solo lo necesario
               mkdir -p /tmp/zip_file_lambda
               
+              # Archivo para guardar la lista de archivos ZIP
+              zip_file_list="/tmp/zip_file_lambda/zip_files.txt"
+              
               # Función para crear ZIPs de funciones Lambda en un directorio dado
               create_zip_files() {
                   local dir=$1
@@ -78,8 +81,8 @@ jobs:
                     # Agrega el nombre del ZIP al array
                     zip_files+=("${function_name}.zip")
 
-                    # Crea el archivo ZIP con el nombre de la función en la carpeta temporal
-                    cp ${function_name}.zip /tmp/zip_file_lambda/
+                    # Escribe el nombre del archivo ZIP en el archivo de texto
+                    echo "${function_name}.zip" >> "$zip_file_list"
                     
                     echo "Creado ZIP para $function_name en $dir"
                   done
