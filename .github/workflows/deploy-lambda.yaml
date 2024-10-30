@@ -155,41 +155,11 @@ jobs:
       run: |
                 # Archivo JSON actual con permisos
                 current_permissions_file="../permissions_lambda.json"
+                echo "actual fichero $current_permissions_file"
       
                 # Obtener el contenido del archivo JSON anterior directamente desde git
                 previous_permissions_json=$(git show HEAD~1:src/permissions_lambda.json)
-      
-                # Realiza un diff para encontrar las diferencias
-                diff_output=$(diff <(echo "$previous_permissions_json") <(cat "src/permissions_lambda.json"))
-      
-                # Procesar la salida del diff para encontrar las funciones Lambda que han cambiado
-                changed_lambdas=$(echo "$diff_output" | grep '^>' | grep -oP '"(\w+)":' | cut -d'"' -f2 | sort -u)
-      
-                # Si hay funciones Lambda que han cambiado, actualizarlas
-                if [ -n "$changed_lambdas" ]; then
-                    echo "Las siguientes funciones Lambda han cambiado sus permisos:"
-                    echo "$changed_lambdas"
-      
-                    # Actualizar las funciones Lambda con los nuevos permisos
-                    for lambda_name in $changed_lambdas; do
-                        policy=$(jq -c ".lambdas[\"$lambda_name\"]" "$permission_json")
-      
-                        echo "Actualizando permisos para $lambda_name..."
-      
-                        # Crea o actualiza la política en AWS IAM
-                        # Crea el rol primero si no existe
-                        if ! aws iam get-role --role-name "$lambda_name" > /dev/null 2>&1; then
-                            echo "Creando rol $lambda_name con la política de confianza..."
-                            aws iam create-role --role-name "$lambda_name" --assume-role-policy-document file://trust-policy.json
-                        fi
-                        
-                        # Asociar la política extraída al rol
-                        aws iam put-role-policy --role-name "$lambda_name" --policy-name "${lambda_name}_policy" --policy-document "$policy"
-                    done
-                else
-                    echo "No se encontraron cambios en los permisos de las funciones Lambda."
-                fi
-      
+                echo "previous permission $previous_permissions_json"
       
     - name: Print changed files
       run: |
