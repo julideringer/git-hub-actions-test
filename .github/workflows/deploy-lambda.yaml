@@ -47,6 +47,8 @@ jobs:
       run: |
               # Inicializa un array para almacenar los nombres de los archivos ZIP creados
               zip_files=()
+              # Crea una carpeta temporal para empaquetar solo lo necesario
+              mkdir -p /tmp/zip_file_lambda
               
               # Función para crear ZIPs de funciones Lambda en un directorio dado
               create_zip_files() {
@@ -76,8 +78,8 @@ jobs:
                     # Agrega el nombre del ZIP al array
                     zip_files+=("${function_name}.zip")
 
-                    # Agrega el nombre del ZIP al archivo temporal
-                    echo " Muestros los $zip_files"
+                    # Crea el archivo ZIP con el nombre de la función en la carpeta temporal
+                    zip -r "/tmp/zip_file_lambda/${function_name}.zip" lambda_function.py
                     
                     echo "Creado ZIP para $function_name en $dir"
                   done
@@ -90,6 +92,9 @@ jobs:
               # Crear ZIPs en los directorios 'src/trips' y 'src/routines'
               create_zip_files "src/trips"
               create_zip_files "routines"
+              # Imprime los archivos ZIP generados en la carpeta temporal
+              echo "Archivos ZIP creados en /tmp/zip_file_lambda:"
+              ls /tmp/zip_file_lambda
       
     - name: Check and Create/Update Lambda functions
       run: |
