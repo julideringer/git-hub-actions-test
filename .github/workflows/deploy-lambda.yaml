@@ -160,6 +160,10 @@ jobs:
                 # Obtener el contenido del archivo JSON anterior directamente desde git
                 previous_permissions_json=$(git show HEAD~1:src/permissions_lambda.json)
                 echo "previous permission $previous_permissions_json"
+
+                # Realiza un diff para encontrar las diferencias
+                diff_output: "$(diff $current_permissions_file <(echo $previous_permissions_json))"
+                echo "previous permission $diff_output"
       
     - name: Print changed files
       run: |
