@@ -117,23 +117,13 @@ jobs:
 
                         # Muestra el valor de 'policy' en los logs
                         echo "Policy para $function_name: $policy"
-                        if [ "$policy" != "null" ]; then
-                          # Define el nombre del rol asociado a esta Lambda
-                          role_name="${function_name}_role"
 
-                          # Verifica si el rol ya existe
-                          if aws iam get-role --role-name "$role_name" >/dev/null 2>&1; then
-                            echo "El rol $role_name ya existe, no se crea de nuevo."
-                          else
-                            echo "Creando el rol $role_name para $function_name"
+                        # Crea el rol con la política de confianza para Lambda
+                        aws iam create-role --role-name "$role_name" --assume-role-policy-document file://trust-policy.json
 
-                            # Crea el rol con la política de confianza para Lambda
-                            aws iam create-role --role-name "$role_name" --assume-role-policy-document file://trust-policy.json
-
-                            # Asocia la política extraída al rol
-                            aws iam put-role-policy --role-name "$role_name" --policy-name "${function_name}_policy" --policy-document "$policy"
-                          fi
-
+                        # Asocia la política extraída al rol
+                        aws iam put-role-policy --role-name "$role_name" --policy-name "${function_name}_policy" --policy-document "$policy"
+                        
                         # Crear la nueva función Lambda
                         aws lambda create-function \
                           --function-name $function_name \
