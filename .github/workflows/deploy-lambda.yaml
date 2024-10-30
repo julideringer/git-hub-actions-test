@@ -227,55 +227,18 @@ jobs:
       run: |
             echo "List of changed files:" 
             git diff --name-only HEAD^ HEAD
+
     - name: Find and Deploy Changed Lambda Functions
       run: |
-              if [ -n "$changed_dependencies" ]; then
-                echo "Changed dependencies are present."
-                echo "MOSTRAMOS LOS ZIP : $zip_files"
-                for zip_files_lambda in $zip_files; do
-                    echo "Se puede apreciar que pasa por aqui"
-                    # Desplegar la función Lambda con el archivo ZIP
-                    aws lambda update-function-code --function-name $function_name --zip-file fileb://zip_files_lambda
-                  done
-              else
-                echo "No changed dependencies."
-                  # Encuentra los archivos .py que cambiaron
-                  changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(routines|trips)/' | grep '\.py$')
-                  echo "Changed Lambda Files: $changed_lambdas"
-                  
-                  for lambda_file in $changed_lambdas; do
-                    # Extrae el nombre del archivo como nombre de la lambda
-                    function_name=$(basename $lambda_file .py)
-                    zip_file_name="${function_name}.zip"
-                    lambda_dir=$(dirname $lambda_file)
-                    
-                    echo "Changes detected in Lambda function: $function_name"
-                    
-                    # Crea una carpeta temporal para empaquetar solo lo necesario
-                    mkdir -p /tmp/${function_name}_package
-                    
-                    # Copia la función Lambda específica a la carpeta temporal
-                    cp $lambda_file /tmp/${function_name}_package/
-                    
-                    # Copia las dependencias necesarias (por ejemplo, trips_tools) a la carpeta temporal
-                    cp -r src/trips_tools /tmp/${function_name}_package/
-                    cp -r src/common_tools /tmp/${function_name}_package/
-                    
-                    # Empaqueta todo en un archivo ZIP en el directorio temporal
-                    cd /tmp/${function_name}_package
-                    zip -r /tmp/$zip_file_name .
-                    
-                    # Volver a la carpeta raíz del repositorio
-                    cd -
-                    
-                    # Desplegar la función Lambda con el archivo ZIP
-                    aws lambda update-function-code --function-name $function_name --zip-file fileb:///tmp/$zip_file_name
-                    
-                    # Limpia el directorio temporal y el archivo ZIP
-                    rm -rf /tmp/${function_name}_package
-                    rm /tmp/$zip_file_name
-                  done
-              fi
+                    if [ -n "$changed_dependencies" ]; then
+                      echo "Changed dependencies are present."
+                      echo "MOSTRAMOS LOS ZIP: $zip_files"
+                      for zip_file_lambda in $zip_files; do
+                        echo "Se puede apreciar que pasa por aquí"
+                        # Desplegar la función Lambda con el archivo ZIP
+                        aws lambda update-function-code --function-name $function_name --zip-file fileb://$zip_file_lambda
+                      done
+                    fi  # Cierra el bloque if
           
           
 
