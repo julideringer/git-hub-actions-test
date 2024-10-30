@@ -166,7 +166,8 @@ jobs:
                 echo "previous permission $diff_output"
 
                 # Procesar la salida del diff para encontrar las funciones Lambda que han cambiado
-                changed_lambdas=$(echo "$diff_output" | grep '^>' | grep -oP '"(\w+)":' | cut -d'"' -f2 | sort -u)
+                changed_lambdas_permission=$(echo "$diff_output" | grep '^>' | grep -oP '"(\w+)":' | cut -d'"' -f2 | sort -u)
+                echo "lambdas que cambian de permisos $changed_lambdas_permission"
       
     - name: Print changed files
       run: |
