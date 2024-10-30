@@ -125,6 +125,10 @@ jobs:
                         # Asocia la política extraída al rol
                         aws iam put-role-policy --role-name "$function_name" --policy-name "${function_name}_policy" --policy-document "$policy"
                         
+                        echo "role arn lo muestro: arn:aws:iam::682033485736:role/$function_name"
+                        # Asegúrate de que el rol se haya creado antes de continuar
+                        echo "Esperando 10 segundos para que se propague la creación del rol..."
+                        sleep 10
                         # Crear la nueva función Lambda
                         aws lambda create-function \
                           --function-name $function_name \
