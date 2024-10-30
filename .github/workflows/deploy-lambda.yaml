@@ -79,7 +79,7 @@ jobs:
                     zip_files+=("${function_name}.zip")
 
                     # Crea el archivo ZIP con el nombre de la función en la carpeta temporal
-                    zip -r "/tmp/zip_file_lambda/${function_name}.zip" lambda_function.py
+                    cp ${function_name}.zip /tmp/zip_file_lambda/
                     
                     echo "Creado ZIP para $function_name en $dir"
                   done
