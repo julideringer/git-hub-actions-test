@@ -123,8 +123,8 @@ jobs:
 
                         # Crea o actualiza la política en AWS IAM
                         # Crea el rol primero si no existe
-                        if ! aws iam get-role --role-name "$lambda_name" > /dev/null 2>&1; then
-                            echo "Creando rol $lambda_name con la política de confianza..."
+                        if ! aws iam get-role --role-name "$function_name" > /dev/null 2>&1; then
+                            echo "Creando rol $function_name con la política de confianza..."
                             # Crea el rol con la política de confianza para Lambda
                             aws iam create-role --role-name "$function_name" --assume-role-policy-document file://$trust_policy_json
                         fi
