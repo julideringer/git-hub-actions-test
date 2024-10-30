@@ -286,6 +286,7 @@ jobs:
                                 rm -rf /tmp/${function_name}_package
                                 rm /tmp/$zip_file_name
                               done
+                            fi
           
           
 
