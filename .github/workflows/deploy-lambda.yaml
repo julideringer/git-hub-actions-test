@@ -106,34 +106,13 @@ jobs:
                       # Verifica si el archivo ZIP existe antes de intentar usarlo
                       zip_file="../${function_name}.zip"
                       if [ -f "$zip_file" ]; then
-                        # Lee el archivo permission_lambda.json
-                        permission_json="../permission_lambda.json"
-                        # Extrae la política del archivo JSON si el nombre de la Lambda coincide
-                        policy=$(jq -c ".lambdas[\"$function_name\"]" "$permission_json")
-                        if [ "$policy" != "null" ]; then
-                          # Define el nombre del rol asociado a esta Lambda
-                          role_name="${function_name}_role"
-
-                          # Verifica si el rol ya existe
-                          if aws iam get-role --role-name "$role_name" >/dev/null 2>&1; then
-                            echo "El rol $role_name ya existe, no se crea de nuevo."
-                          else
-                            echo "Creando el rol $role_name para $function_name"
-
-                            # Crea el rol con la política de confianza para Lambda
-                            aws iam create-role --role-name "$role_name" --assume-role-policy-document file://trust-policy.json
-
-                            # Asocia la política extraída al rol
-                            aws iam put-role-policy --role-name "$role_name" --policy-name "${function_name}_policy" --policy-document "$policy"
-                          fi
-
                         # Crear la nueva función Lambda
                         aws lambda create-function \
                           --function-name $function_name \
                           --zip-file fileb://$zip_file \
                           --handler lambda_function.lambda_handler \
                           --runtime python3.10 \
-                          --role arn:aws:iam::682033485736:role/service-role/$role_name \
+                          --role arn:aws:iam::682033485736:role/service-role/git_hub_actions_test-role-4qk5fqjf \
                           --timeout 30 \
                           --memory-size 128
                       else
@@ -193,3 +172,5 @@ jobs:
                     rm /tmp/$zip_file_name
                   done
           
+          
+
