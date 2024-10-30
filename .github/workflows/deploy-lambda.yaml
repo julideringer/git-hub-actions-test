@@ -119,7 +119,7 @@ jobs:
                         # Muestra el valor de 'policy' en los logs
                         echo "Policy para $function_name: $policy"
 
-                        echo "Actualizando permisos para $lambda_name..."
+                        echo "Actualizando permisos para $function_name..."
 
                         # Crea o actualiza la política en AWS IAM
                         # Crea el rol primero si no existe
@@ -229,8 +229,18 @@ jobs:
             git diff --name-only HEAD^ HEAD
     - name: Find and Deploy Changed Lambda Functions
       run: |
+              if [ -n "$changed_dependencies" ]; then
+                echo "Changed dependencies are present."
+                echo "MOSTRAMOS LOS ZIP : $zip_files"
+                for zip_files_lambda in $zip_files; do
+                    echo "Se puede apreciar que pasa por aqui"
+                    # Desplegar la función Lambda con el archivo ZIP
+                    aws lambda update-function-code --function-name $function_name --zip-file fileb://zip_files_lambda
+                  done
+              else
+                echo "No changed dependencies."
                   # Encuentra los archivos .py que cambiaron
-                  changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/(routines|trips)/' | uniq)
+                  changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(routines|trips)/' | grep '\.py$')
                   echo "Changed Lambda Files: $changed_lambdas"
                   
                   for lambda_file in $changed_lambdas; do
@@ -265,6 +275,7 @@ jobs:
                     rm -rf /tmp/${function_name}_package
                     rm /tmp/$zip_file_name
                   done
+              fi
           
           
 
