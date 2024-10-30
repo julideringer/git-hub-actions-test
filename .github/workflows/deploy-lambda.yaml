@@ -90,8 +90,9 @@ jobs:
       
     - name: Check and Create/Update Lambda functions
       run: |
-              # Lee el archivo permission_lambda.json
-              permission_json="../permission_lambda.json"
+              # Lee el archivo permissions_lambda.json
+              permission_json="../permissions_lambda.json"
+
               # Función para verificar y crear funciones Lambda
               check_and_create_lambda() {
                   local dir=$1
@@ -110,10 +111,13 @@ jobs:
                       # Verifica si el archivo ZIP existe antes de intentar usarlo
                       zip_file="../${function_name}.zip"
                       if [ -f "$zip_file" ]; then
+
                         # Extrae la política del archivo JSON si el nombre de la Lambda coincide
                         policy=$(jq -c ".lambdas[\"$function_name\"]" "$permission_json")
+
                         # Muestra el valor de 'policy' en los logs
                         echo "Policy para $function_name: $policy"
+                        
                         # Crear la nueva función Lambda
                         aws lambda create-function \
                           --function-name $function_name \
