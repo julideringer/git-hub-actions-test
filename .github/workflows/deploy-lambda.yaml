@@ -247,8 +247,10 @@ jobs:
                                       changed_dependencies=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(common_tools|trips_tools)/' | grep '\.py$')
                                       echo "MOSTRAMOS changed_dependencies: $changed_dependencies"
 
-                                      if [ -n "$changed_dependencies" ]; then 
-                                          for lambda_file in $changed_lambdas; do
+                                      if [ -n "$changed_dependencies" ]; then
+                                          lambda_file_find=find src/routines src/trips -type f -name "*.py"
+                                          echo "mostramos las todos los .py que se van a cambiar por cambiar funciones $lambda_file_find" 
+                                          for lambda_file in $lambda_file_find; do
                                             # Extrae el nombre del archivo como nombre de la lambda
                                             function_name=$(basename $lambda_file .py)
                                             zip_file_name="${function_name}.zip"
