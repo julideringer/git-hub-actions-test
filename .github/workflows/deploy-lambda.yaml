@@ -47,7 +47,6 @@ jobs:
       run: |
               # Inicializa un array para almacenar los nombres de los archivos ZIP creados
               zip_files=()
-              zip_file_list="src/zip_files_lambdas.txt"
               
               # Función para crear ZIPs de funciones Lambda en un directorio dado
               create_zip_files() {
@@ -78,7 +77,7 @@ jobs:
                     zip_files+=("${function_name}.zip")
 
                     # Agrega el nombre del ZIP al archivo temporal
-                    echo "${function_name}.zip" >> "$zip_file_list"
+                    echo " Muestros los $zip_files"
                     
                     echo "Creado ZIP para $function_name en $dir"
                   done
