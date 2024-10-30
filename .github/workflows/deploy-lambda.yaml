@@ -244,7 +244,7 @@ jobs:
     - name: Find and Deploy Changed Lambda Functions
       run: |
                                         # Encuentra los archivos .py que cambiaron
-                                        changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep '^src/(routines|trips)/' | grep '\.py$' | uniq)
+                                        changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(routines|trips)/.*\.py$' | uniq)
                                         echo "Changed Lambda Files: $changed_lambdas"
                                         
                                         for lambda_file in $changed_lambdas; do
