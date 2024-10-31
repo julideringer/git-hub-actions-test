@@ -286,6 +286,7 @@ jobs:
     - name: Find and Deploy Changed Lambda Functions
       run: |
                         # Encuentra las dependencias cambiadas
+                        echo "hola estoy aqui"
                         changed_dependencies=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(common_tools|trips_tools)/' | grep '\.py$')
                         echo "MOSTRAMOS changed_dependencies: $changed_dependencies"
 
