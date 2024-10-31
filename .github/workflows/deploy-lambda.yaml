@@ -159,9 +159,6 @@ jobs:
               check_and_create_lambda() {
                   local dir=$1
                   cd $dir
-                  # Muestra el directorio actual
-                  echo "Directorio actual: $(pwd)"
-                  echo "Directorio actual: $(ls -l)"
       
                   # Recorre todos los archivos .py en el directorio
                   for lambda_file in *.py; do
@@ -171,17 +168,9 @@ jobs:
                     # Verifica si la función Lambda ya existe en AWS
                     if aws lambda get-function --function-name $function_name > /dev/null 2>&1; then
                       echo "La función Lambda $function_name ya existe, no se crea de nuevo."
-                      zip_file_test1=$(find ../ -name "${function_name}.zip")
-                      echo "aqui esta el ziptest : $zip_file_test"
                     else
                       echo "Creando nueva función Lambda: $function_name"
                       # Verifica si el archivo ZIP existe antes de intentar usarlo
-                      # Buscar el archivo ZIP específico para el Lambda
-                      echo "Archivos en con zip"
-                      zip_file_test=$(find ../ -name "${function_name}.zip")
-                      echo "aqui esta el zip : $zip_file_test"
-                      echo "Archivos en el directorio padre:"
-                      ls -l ../
                       zip_file="../${function_name}.zip"
                       if [ -f "$zip_file" ]; then
 
@@ -232,9 +221,6 @@ jobs:
               check_and_create_lambda_subdirectory() {
                   local dir=$1
                   cd $dir
-                  # Muestra el directorio actual
-                  echo "Directorio actual: $(pwd)"
-                  echo "Directorio actual: $(ls -l)"
                   current_directory=$(pwd)
       
                   # Recorre todos los archivos .py en el directorio
@@ -254,7 +240,6 @@ jobs:
                       # Verifica si el archivo ZIP existe antes de intentar usarlo
                       # Buscar el archivo ZIP específico para el Lambda
                       cd ..
-                      pwd
                       zip_file="../${function_name}.zip"
                       if [ -f "$zip_file" ]; then
 
@@ -326,6 +311,12 @@ jobs:
 
               # Verificar y crear funciones Lambda en el directorio 'src/users'
               check_and_create_lambda_subdirectory "../users/preferences"
+
+              # Verificar y crear funciones Lambda en el directorio 'src/users'
+              check_and_create_lambda_subdirectory "../users/vehicles"
+
+              # Verificar y crear funciones Lambda en el directorio 'src/users'
+              check_and_create_lambda_subdirectory "../users/profile"
 
     - name: Update Lambda Permissions
       run: |
