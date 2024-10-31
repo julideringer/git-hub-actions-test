@@ -281,7 +281,8 @@ jobs:
                           rm -rf /tmp/${function_name}_package
                           rm /tmp/$zip_file_name
                       done
-                  else
+                  fi
+                  if [ -z "$changed_dependencies" ]; then
                       changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(routines|trips)/.*\.py$' | uniq)
                       echo "Changed Lambda Files: $changed_lambdas"
               
