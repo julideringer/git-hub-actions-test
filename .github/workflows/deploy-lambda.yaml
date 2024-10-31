@@ -224,10 +224,6 @@ jobs:
                   done
               }
 
-              # Lee el archivo permissions_lambda.json
-              permission_json="../permissions_lambda.json"
-              trust_policy_json="../trust-policy.json"
-
               # Función para verificar y crear funciones Lambda
               check_and_create_lambda_subdirectory() {
                   local dir=$1
