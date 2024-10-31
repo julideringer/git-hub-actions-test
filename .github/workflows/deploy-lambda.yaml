@@ -283,7 +283,7 @@ jobs:
                       done
                   fi
 
-    - name: Find and Deploy Changed Lambda Functions
+    - name: Actualizar diferencias
       run: |
                         # Encuentra las dependencias cambiadas
                         echo "hola estoy aqui"
