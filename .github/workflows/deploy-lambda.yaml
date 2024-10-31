@@ -219,6 +219,7 @@ jobs:
 
               # Función para verificar y crear funciones Lambda
               check_and_create_lambda_subdirectory() {
+                  pwd
                   local dir=$1
                   cd $dir
                   current_directory=$(pwd)
