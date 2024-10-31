@@ -77,6 +77,9 @@ jobs:
 
                     # Crea el archivo ZIP incluyendo las dependencias en trips_tools/
                     zip -r ../${function_name}.zip lambda_function.py ../common_tools/
+
+                    # Crea el archivo ZIP incluyendo las dependencias en routines_tools/
+                    zip -r ../${function_name}.zip lambda_function.py ../routines_tools/
                     
                     # Agrega el nombre del ZIP al array
                     zip_files+=("${function_name}.zip")
@@ -169,6 +172,24 @@ jobs:
               # Verificar y crear funciones Lambda en el directorio 'src/routines'
               check_and_create_lambda "../routines"
 
+              # Verificar y crear funciones Lambda en el directorio 'src/chat'
+              check_and_create_lambda "../chat"
+
+              # Verificar y crear funciones Lambda en el directorio 'src/payments'
+              check_and_create_lambda "../payments"
+
+              # Verificar y crear funciones Lambda en el directorio 'src/reservations'
+              check_and_create_lambda "../reservations"
+
+              # Verificar y crear funciones Lambda en el directorio 'src/signin'
+              check_and_create_lambda "../signin"
+
+              # Verificar y crear funciones Lambda en el directorio 'src/signup'
+              check_and_create_lambda "../signup"
+
+              # Verificar y crear funciones Lambda en el directorio 'src/superadmin'
+              check_and_create_lambda "../superadmin"
+
     - name: Update Lambda Permissions
       run: |
               # Archivo JSON actual con permisos
@@ -241,7 +262,7 @@ jobs:
 
     - name: Find and Deploy Changed Lambda Functions other functions
       run: |
-            changed_dependencies=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(common_tools|trips_tools)/' | grep '\.py$'|| true)
+            changed_dependencies=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(common_tools|trips_tools)|routines_tools/' | grep '\.py$'|| true)
             echo "hola"
             echo "$changed_dependencies"
             # Verifica la longitud de la variable
@@ -305,6 +326,7 @@ jobs:
                                 # Copia las dependencias necesarias (por ejemplo, trips_tools) a la carpeta temporal
                                 cp -r src/trips_tools "/tmp/${function_name}_package/"
                                 cp -r src/common_tools "/tmp/${function_name}_package/"
+                                cp -r src/routines_tools "/tmp/${function_name}_package/"
 
                                 # Empaqueta todo en un archivo ZIP en el directorio temporal
                                 cd "/tmp/${function_name}_package" || exit
