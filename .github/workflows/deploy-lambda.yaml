@@ -219,7 +219,7 @@ jobs:
 
               # Función para verificar y crear funciones Lambda
               check_and_create_lambda_subdirectory() {
-                  pwd
+                  initial_directory=$(pwd)
                   local dir=$1
                   cd $dir
                   current_directory=$(pwd)
@@ -233,8 +233,6 @@ jobs:
                     # Verifica si la función Lambda ya existe en AWS
                     if aws lambda get-function --function-name $function_name > /dev/null 2>&1; then
                       echo "La función Lambda $function_name ya existe, no se crea de nuevo."
-                      zip_file_test1=$(find ../ -name "${function_name}.zip")
-                      echo "aqui esta el ziptest : $zip_file_test"
                     else
                       echo "Creando nueva función Lambda: $function_name"
 
@@ -281,6 +279,7 @@ jobs:
                       fi
                     fi
                   done
+                  cd "$initial_directory" || exit
               }
       
               # Verificar y crear funciones Lambda en el directorio 'src/trips'
@@ -314,10 +313,10 @@ jobs:
               check_and_create_lambda_subdirectory "../users/preferences"
 
               # Verificar y crear funciones Lambda en el directorio 'src/users'
-              check_and_create_lambda_subdirectory "users/vehicles"
+              check_and_create_lambda_subdirectory "../users/vehicles"
 
               # Verificar y crear funciones Lambda en el directorio 'src/users'
-              check_and_create_lambda_subdirectory "users/profile"
+              check_and_create_lambda_subdirectory "../users/profile"
 
     - name: Update Lambda Permissions
       run: |
