@@ -165,6 +165,8 @@ jobs:
                     # Verifica si la función Lambda ya existe en AWS
                     if aws lambda get-function --function-name $function_name > /dev/null 2>&1; then
                       echo "La función Lambda $function_name ya existe, no se crea de nuevo."
+                      zip_file_test1=$(find ../ -name "${lambda_file}.zip")
+                      echo "aqui esta el ziptest : $zip_file_test"
                     else
                       echo "Creando nueva función Lambda: $function_name"
                       # Verifica si el archivo ZIP existe antes de intentar usarlo
