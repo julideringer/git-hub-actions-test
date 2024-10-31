@@ -241,7 +241,7 @@ jobs:
 
     - name: Find and Deploy Changed Lambda Functions other functions
       run: |
-          echo "MOSTRAMOS changed_dependencies: entra antes del git dif trips_tools"
+          echo "MOSTRAMOS changed_dependencies: entra antes cambiar los comman_tools"
           
           if [ "$(git diff --name-only HEAD^ HEAD | grep -E '^src/(common_tools|trips_tools)/' | grep '\.py$')" != "none" ]; then
               lambda_file_find=$(find src/routines src/trips -type f -name "*.py")
