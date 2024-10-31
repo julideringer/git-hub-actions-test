@@ -241,7 +241,7 @@ jobs:
 
     - name: Find and Deploy Changed Lambda Functions other functions
       run: |
-            changed_dependencies=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(common_tools|trips_tools)/' | grep '\.py$')
+            changed_dependencies=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(common_tools|trips_tools)/' | grep '\.py$'|| true)
             echo "hola"
             echo "$changed_dependencies"
             # Verifica la longitud de la variable
