@@ -252,7 +252,6 @@ jobs:
                       # Buscar el archivo ZIP específico para el Lambda
                       cd ..
                       zip_file="../${function_name}.zip"
-                      cd -
                       if [ -f "$zip_file" ]; then
 
                         # Extrae la política del archivo JSON si el nombre de la Lambda coincide
