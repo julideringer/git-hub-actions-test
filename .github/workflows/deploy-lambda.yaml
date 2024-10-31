@@ -94,6 +94,40 @@ jobs:
                   ls -l ../
                   cd ..
               }
+
+              # Función para crear ZIPs de funciones Lambda en un subdirectorio dado
+              create_zip_files_subdirectory() {
+                  local dir=$1
+                  cd $dir
+          
+                  # Recorre todos los archivos .py en el directorio y sus subdirectorios
+                  find . -type f -name "*.py" | while read -r lambda_file; do
+                    # Extrae el nombre del archivo sin la extensión y la ruta relativa
+                    function_name=$(basename "$lambda_file" .py)
+                    file_dir=$(dirname "$lambda_file")
+          
+                    # Cambia el nombre del archivo a lambda_function.py temporalmente en su directorio
+                    mv "$lambda_file" "${file_dir}/lambda_function.py"
+                    
+                    # Crea el archivo ZIP con el nombre de la función en la carpeta raíz
+                    zip -r "../${function_name}.zip" "${file_dir}/lambda_function.py" ../trips_tools/ ../common_tools/ ../routines_tools/
+                    
+                    # Devuelve el archivo a su nombre original
+                    mv "${file_dir}/lambda_function.py" "$lambda_file"
+                    
+                    # Agrega el nombre del ZIP al array
+                    zip_files+=("${function_name}.zip")
+          
+                    # Escribe el nombre del archivo ZIP en el archivo de texto
+                    echo "${function_name}.zip" >> "$zip_file_list"
+                    
+                    echo "Creado ZIP para $function_name en $dir/$file_dir"
+                  done
+          
+                  # Verificar que los archivos ZIP se crearon correctamente
+                  ls -l ../
+                  cd ..
+              }
       
               # Crear ZIPs en los directorios 'src/trips' y 'src/routines'
               create_zip_files "src/trips"
@@ -104,10 +138,7 @@ jobs:
               create_zip_files "signin"
               create_zip_files "signup"
               create_zip_files "superadmin"
-              create_zip_files "users"
-              create_zip_files "users/vehicles"
-              create_zip_files "users/profile"
-              create_zip_files "users/preferences"
+              create_zip_files_subdirectory "users"
               # Imprime los archivos ZIP generados en la carpeta temporal
               echo "Archivos ZIP creados en /tmp/zip_file_lambda:"
               cat /tmp/zip_file_lambda/zip_files.txt
