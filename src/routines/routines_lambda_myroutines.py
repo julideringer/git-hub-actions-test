@@ -9,7 +9,7 @@ routines_table = boto3.resource("dynamodb").Table(ROUTINES_TABLE)
 
 def lambda_handler(event, context):
     """lambda handler"""
-    print("fjjfddddddj")
+    print("fjjfddddddddddj")
     user_id = event['params']['querystring']['userId']
     try:
         routines = routines_table.query(IndexName='driver_id-index',
