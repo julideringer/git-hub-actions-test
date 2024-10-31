@@ -101,7 +101,7 @@ jobs:
                   cd $dir
           
                   # Recorre todos los archivos .py en el directorio y sus subdirectorios
-                  find . -type f -name "*.py" | while read -r lambda_file; do
+                  find . -type d -path "./profile/docker_scripts" -prune -o -type f -name "*.py" -print | while read -r lambda_file; do
                     # Extrae el nombre del archivo sin la extensión y la ruta relativa
                     function_name=$(basename "$lambda_file" .py)
                     file_dir=$(dirname "$lambda_file")
@@ -111,11 +111,6 @@ jobs:
                     
                     # Crea el archivo ZIP con el nombre de la función en la carpeta raíz
                     zip -r "../${function_name}.zip" "${file_dir}/lambda_function.py" ../trips_tools/ ../common_tools/ ../routines_tools/
-
-                    # Devuelve el archivo a su nombre original si fue renombrado
-                    if [[ "$lambda_file" != "lambda_function.py" ]]; then
-                      mv lambda_function.py "$lambda_file"
-                    fi
                     
                     # Devuelve el archivo a su nombre original
                     mv "${file_dir}/lambda_function.py" "$lambda_file"
