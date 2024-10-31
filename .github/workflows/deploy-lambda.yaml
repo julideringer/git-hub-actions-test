@@ -241,11 +241,9 @@ jobs:
 
     - name: Find and Deploy Changed Lambda Functions other functions
       run: |
-          # Encuentra las dependencias cambiadas
-          changed_dependencies=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(common_tools|trips_tools)/' | grep '\.py$')
           echo "MOSTRAMOS changed_dependencies: $changed_dependencies"
           
-          if [ -n "$changed_dependencies" ]; then
+          if [ "$(git diff --name-only HEAD^ HEAD | grep -E '^src/(common_tools|trips_tools)/' | grep '\.py$')" != "none" ]; then
               lambda_file_find=$(find src/routines src/trips -type f -name "*.py")
               echo "Mostramos todos los .py que se van a cambiar por cambios en funciones: $lambda_file_find"
           
