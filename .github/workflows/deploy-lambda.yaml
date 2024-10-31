@@ -109,8 +109,14 @@ jobs:
                     # Cambia el nombre del archivo a lambda_function.py temporalmente en su directorio
                     mv "$lambda_file" "${file_dir}/lambda_function.py"
                     
-                    # Crea el archivo ZIP con el nombre de la función en la carpeta raíz
-                    zip -r "../${function_name}.zip" "${file_dir}/lambda_function.py" ../trips_tools/ ../common_tools/ ../routines_tools/
+                    # Crea el archivo ZIP incluyendo las dependencias en trips_tools/
+                    zip -r ../${function_name}.zip lambda_function.py ../trips_tools/
+
+                    # Crea el archivo ZIP incluyendo las dependencias en trips_tools/
+                    zip -r ../${function_name}.zip lambda_function.py ../common_tools/
+
+                    # Crea el archivo ZIP incluyendo las dependencias en routines_tools/
+                    zip -r ../${function_name}.zip lambda_function.py ../routines_tools/
                     
                     # Devuelve el archivo a su nombre original
                     mv "${file_dir}/lambda_function.py" "$lambda_file"
@@ -217,6 +223,75 @@ jobs:
                     fi
                   done
               }
+
+              # Lee el archivo permissions_lambda.json
+              permission_json="../permissions_lambda.json"
+              trust_policy_json="../trust-policy.json"
+
+              # Función para verificar y crear funciones Lambda
+              check_and_create_lambda_subdirectory() {
+                  local dir=$1
+                  cd $dir
+                  # Muestra el directorio actual
+                  echo "Directorio actual: $(pwd)"
+                  echo "Directorio actual: $(ls -l)"
+      
+                  # Recorre todos los archivos .py en el directorio
+                  for lambda_file in *.py; do
+                    # Extrae el nombre de la función a partir del archivo
+                    function_name=$(basename $lambda_file .py)
+                    
+                    # Verifica si la función Lambda ya existe en AWS
+                    if aws lambda get-function --function-name $function_name > /dev/null 2>&1; then
+                      echo "La función Lambda $function_name ya existe, no se crea de nuevo."
+                      zip_file_test1=$(find ../ -name "${function_name}.zip")
+                      echo "aqui esta el ziptest : $zip_file_test"
+                    else
+                      echo "Creando nueva función Lambda: $function_name"
+                      # Verifica si el archivo ZIP existe antes de intentar usarlo
+                      # Buscar el archivo ZIP específico para el Lambda
+                      cd ..
+                      zip_file="../${function_name}.zip"
+                      if [ -f "$zip_file" ]; then
+
+                        # Extrae la política del archivo JSON si el nombre de la Lambda coincide
+                        policy=$(jq -c ".lambdas[\"$function_name\"]" "$permission_json")
+
+                        # Muestra el valor de 'policy' en los logs
+                        echo "Policy para $function_name: $policy"
+
+                        echo "Actualizando permisos para $function_name..."
+
+                        # Crea o actualiza la política en AWS IAM
+                        # Crea el rol primero si no existe
+                        if ! aws iam get-role --role-name "$function_name" > /dev/null 2>&1; then
+                            echo "Creando rol $function_name con la política de confianza..."
+                            # Crea el rol con la política de confianza para Lambda
+                            aws iam create-role --role-name "$function_name" --assume-role-policy-document file://$trust_policy_json
+                        fi
+
+                        # Asocia la política extraída al rol
+                        aws iam put-role-policy --role-name "$function_name" --policy-name "${function_name}_policy" --policy-document "$policy"
+                        
+                        echo "role arn lo muestro: arn:aws:iam::682033485736:role/$function_name"
+                        # Asegúrate de que el rol se haya creado antes de continuar
+                        echo "Esperando 10 segundos para que se propague la creación del rol..."
+                        sleep 10
+                        # Crear la nueva función Lambda
+                        aws lambda create-function \
+                          --function-name $function_name \
+                          --zip-file fileb://$zip_file \
+                          --handler lambda_function.lambda_handler \
+                          --runtime python3.10 \
+                          --role arn:aws:iam::682033485736:role/$function_name \
+                          --timeout 30 \
+                          --memory-size 128
+                      else
+                        echo "Error: El archivo ZIP para $function_name no se encontró. No se puede crear la función Lambda."
+                      fi
+                    fi
+                  done
+              }
       
               # Verificar y crear funciones Lambda en el directorio 'src/trips'
               check_and_create_lambda "src/trips"
@@ -246,7 +321,7 @@ jobs:
               check_and_create_lambda "../users"
 
               # Verificar y crear funciones Lambda en el directorio 'src/users'
-              check_and_create_lambda "../users/preferences"
+              check_and_create_lambda_subdirectory "../users/preferences"
 
     - name: Update Lambda Permissions
       run: |
