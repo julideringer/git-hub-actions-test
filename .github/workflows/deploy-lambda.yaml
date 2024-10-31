@@ -102,7 +102,7 @@ jobs:
               create_zip_files "chat"
               create_zip_files "reservations"
               create_zip_files "sigin"
-              create_zip_files "sigup"
+              create_zip_files "signup"
               create_zip_files "superadmin"
               # Imprime los archivos ZIP generados en la carpeta temporal
               echo "Archivos ZIP creados en /tmp/zip_file_lambda:"
