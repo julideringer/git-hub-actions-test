@@ -239,7 +239,7 @@ jobs:
       
                   # Recorre todos los archivos .py en el directorio
                   for lambda_file in *.py; do
-                    cd current_directory
+                    cd $current_directory
                     # Extrae el nombre de la función a partir del archivo
                     function_name=$(basename $lambda_file .py)
                     
