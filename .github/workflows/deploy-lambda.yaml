@@ -155,6 +155,7 @@ jobs:
                   cd $dir
                   # Muestra el directorio actual
                   echo "Directorio actual: $(pwd)"
+                  echo "Directorio actual: $(ls -l)"
       
                   # Recorre todos los archivos .py en el directorio
                   for lambda_file in *.py; do
