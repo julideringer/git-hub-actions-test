@@ -105,6 +105,9 @@ jobs:
               create_zip_files "signup"
               create_zip_files "superadmin"
               create_zip_files "users"
+              create_zip_files "users/vehicles"
+              create_zip_files "users/profile"
+              create_zip_files "users/preferences"
               # Imprime los archivos ZIP generados en la carpeta temporal
               echo "Archivos ZIP creados en /tmp/zip_file_lambda:"
               cat /tmp/zip_file_lambda/zip_files.txt
