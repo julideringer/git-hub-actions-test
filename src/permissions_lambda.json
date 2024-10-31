@@ -301,6 +301,21 @@
         }
       ]
     },
+    "preferences_lambda_change_password": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
     "preferences_lambda_terms_conditions": {
       "Version": "2012-10-17",
       "Statement": [
@@ -841,7 +856,172 @@
         }
       ]
     },
-    "stripe_lambda_balance": {
+    "profile_lambda_confirm_attribute": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
+    "profile_lambda_user_update": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
+    "profile_lambda_verify_attribute": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
+    "vehicle_lambda_creation": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
+    "vehicle_lambda_delete": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
+    "vehicle_lambda_get": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
+    "vehicle_lambda_update": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
+    "user_lambda_chats": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
+    "user_lambda_info": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
+    "user_lambda_reservations": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
+    "user_lambda_routines": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
+    "user_lambda_trips": {
       "Version": "2012-10-17",
       "Statement": [
         {
