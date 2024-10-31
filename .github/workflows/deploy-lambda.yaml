@@ -238,6 +238,7 @@ jobs:
       
                   # Recorre todos los archivos .py en el directorio
                   for lambda_file in *.py; do
+                    local dir=$1
                     cd $dir
                     # Extrae el nombre de la función a partir del archivo
                     function_name=$(basename $lambda_file .py)
@@ -249,12 +250,11 @@ jobs:
                       echo "aqui esta el ziptest : $zip_file_test"
                     else
                       echo "Creando nueva función Lambda: $function_name"
-                      cd preferences
                       # Verifica si el archivo ZIP existe antes de intentar usarlo
                       # Buscar el archivo ZIP específico para el Lambda
                       cd ..
                       pwd
-                      zip_file="../../${function_name}.zip"
+                      zip_file="../${function_name}.zip"
                       if [ -f "$zip_file" ]; then
 
                         # Extrae la política del archivo JSON si el nombre de la Lambda coincide
