@@ -231,8 +231,11 @@ jobs:
               # Verificar y crear funciones Lambda en el directorio 'src/superadmin'
               check_and_create_lambda "../superadmin"
 
-              # Verificar y crear funciones Lambda en el directorio 'src/superadmin'
+              # Verificar y crear funciones Lambda en el directorio 'src/users'
               check_and_create_lambda "../users"
+
+              # Verificar y crear funciones Lambda en el directorio 'src/users'
+              check_and_create_lambda "../users/preferences"
 
     - name: Update Lambda Permissions
       run: |
