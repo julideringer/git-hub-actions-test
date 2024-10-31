@@ -313,7 +313,7 @@ jobs:
               check_and_create_lambda_subdirectory "../users/preferences"
 
               # Verificar y crear funciones Lambda en el directorio 'src/users'
-              check_and_create_lambda_subdirectory "../users/vehicles"
+              check_and_create_lambda_subdirectory "users/vehicles"
 
               # Verificar y crear funciones Lambda en el directorio 'src/users'
               check_and_create_lambda_subdirectory "users/profile"
