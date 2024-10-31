@@ -153,6 +153,8 @@ jobs:
               check_and_create_lambda() {
                   local dir=$1
                   cd $dir
+                  # Muestra el directorio actual
+                  echo "Directorio actual: $(pwd)"
       
                   # Recorre todos los archivos .py en el directorio
                   for lambda_file in *.py; do
