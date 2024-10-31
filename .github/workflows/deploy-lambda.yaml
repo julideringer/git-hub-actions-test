@@ -168,6 +168,10 @@ jobs:
                     else
                       echo "Creando nueva función Lambda: $function_name"
                       # Verifica si el archivo ZIP existe antes de intentar usarlo
+                      # Buscar el archivo ZIP específico para el Lambda
+                      echo "Archivos en con zip"
+                      zip_file_test=$(find ../ -name "${lambda_file}.zip")
+                      echo "aqui esta el zip : $zip_file_test"
                       echo "Archivos en el directorio padre:"
                       ls -l ../
                       zip_file="../${function_name}.zip"
