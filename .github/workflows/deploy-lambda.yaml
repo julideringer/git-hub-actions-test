@@ -44,7 +44,8 @@ jobs:
         sudo apt-get install -y jq
 
     - name: Run Flake8
-      run: flake8 src/
+      run: | 
+        flake8 src/
 
     - name: Create ZIPs for Lambda functions
       run: |
