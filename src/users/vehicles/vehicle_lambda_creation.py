@@ -10,6 +10,7 @@ vehicles_table = boto3.resource("dynamodb").Table(VEHICLES_TABLE)
 
 def lambda_handler(event, context):
     """lambda handler"""
+    print("holatest")
     user_id = event["params"]["path"]["id"]
     vehicle_id = str(uuid.uuid4())
     try:
