@@ -415,6 +415,7 @@ jobs:
                   # Copia las dependencias necesarias (por ejemplo, trips_tools) a la carpeta temporal
                   cp -r src/trips_tools /tmp/${function_name}_package/
                   cp -r src/common_tools /tmp/${function_name}_package/
+                  cp -r src/routines_tools /tmp/${function_name}_package/
           
                   # Empaqueta todo en un archivo ZIP en el directorio temporal
                   cd /tmp/${function_name}_package
@@ -434,7 +435,7 @@ jobs:
 
     - name: Actualizar diferencias
       run: |
-                            changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(routines|trips)/.*\.py$' | uniq)
+                            changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(routines|trips|chat|payments|reservations|signin|signup|superadmin|users)/.*\.py$' | uniq)
                             echo "Changed Lambda Files: $changed_lambdas"
 
                             for lambda_file in $changed_lambdas; do
