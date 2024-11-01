@@ -69,7 +69,6 @@ def get_available_chats(user_id):
 
 def lambda_handler(event, context):
     """lambda handler"""
-    print("holatest")
     user_id = event["params"]["querystring"]["userId"]
     response = []
     try:
