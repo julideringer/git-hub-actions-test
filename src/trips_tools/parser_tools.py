@@ -1,5 +1,24 @@
 """tool library to parse trip response"""
 
+def parser_to_snake_case(raw_item):
+    """lambda function to parse to camel case"""
+    return {
+        "driver_id": raw_item["userId"],
+        "vehicle_id": raw_item["vehicleId"],
+        "departure_location": raw_item["departureLocation"],
+        "arrival_location": raw_item["arrivalLocation"],
+        "latitude_departure": raw_item["latitudDeparture"],
+        "longitude_departure": raw_item["longitudDeparture"],
+        "latitude_arrival": raw_item["latitudArrival"],
+        "longitude_arrival": raw_item["longitudArrival"],
+        "departure_time": raw_item["departureTime"],
+        "arrival_time": raw_item["arrivalTime"],
+        "total_seats": raw_item["totalSeats"],
+        "comment": raw_item["comment"],
+        "price": raw_item["price"],
+        "reservation_mode": raw_item["reservationMode"],
+    }
+
 def response_trip_parser(trip):
     """function to parse the trip response"""
     trip_response = {
@@ -17,11 +36,12 @@ def response_trip_parser(trip):
        "vehicle_id": trip["vehicle_id"],
        "comment": trip["comment"],
        "departure_time": trip["departure_time"],
-       "arrival_time": trip["arrival_time"],
        "departure_location": trip["departure_location"],
        "arrival_location": trip["arrival_location"],
        "price": trip["price"],
     }
+    if "arrival_time" in trip:
+        trip_response["arrival_time"] = trip["arrival_time"]
     if "passengers_info" in trip:
         trip_response["passengers_info"] = trip["passengers_info"]
     if "requests_info" in trip:

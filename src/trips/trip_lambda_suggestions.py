@@ -5,13 +5,14 @@ import geohash
 import boto3
 from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Attr
-from src.trips_tools.get_user_info import get_user_info_from_tripsb64
-from src.trips_tools.parser_tools import response_trip_parser
-from src.common_tools.payload_parser import success_return_parser, error_return_parser
+from common_tools.get_user_info import get_user_info_from_tripsb64
+from common_tools.payload_parser import success_return_parser, error_return_parser
+from common_tools.payload_parser import dict_parser_to_camel_case
+from trips_tools.parser_tools import response_trip_parser
 
 trips_table = boto3.resource("dynamodb").Table('trips')
 
-def search_nearby_trips(orig_geohash, items_nearby, departure_ecode_five):
+def search_suggestions(orig_geohash, items_nearby, departure_ecode_five):
     """search_nearby_trips"""
     cercanos = []
     nuevos_items=[]
@@ -65,15 +66,16 @@ def lambda_handler(event, context= None):
             FilterExpression=Attr('departure_time').gte(fecha_hora_formateada)\
                 & Attr('driver_id').ne(user_id))['Items']
         items_sorted = sorted(items, key=lambda x: x['departure_time'], reverse=False)
-        nearby_trips = search_nearby_trips(
+        suggested_trips = search_suggestions(
             encoded_departure, items_sorted, departure_precision_menor)
-        if len(nearby_trips) == 0:
-            return success_return_parser(None, {"suggestedTrips": nearby_trips})
-        trips = get_user_info_from_tripsb64(nearby_trips)[:10]
+        if len(suggested_trips) == 0:
+            return success_return_parser("No trip found", suggested_trips)
+        trips = get_user_info_from_tripsb64(suggested_trips)[:10]
         for trip in trips:
-            parsed_trips.append(deepcopy(response_trip_parser(trip)))
+            parsed_object = dict_parser_to_camel_case(response_trip_parser(trip))
+            parsed_trips.append(deepcopy(parsed_object))
         return success_return_parser(
-            None, {"suggestedTrips": parsed_trips})
+            None, parsed_trips)
     except ClientError as error:
         return error_return_parser(
             error.response['Error']['Message'], error.response['Error']['Code'])

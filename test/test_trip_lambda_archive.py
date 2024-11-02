@@ -3,6 +3,8 @@ import sys
 import os
 
 # Añadir la ruta de src al PYTHONPATH para importar correctamente
+print("hola")
+# Añadir la ruta de src al PYTHONPATH para importar correctamente
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 from trips.trip_lambda_archive import lambda_handler  # Asegúrate de importar correctamente
 
