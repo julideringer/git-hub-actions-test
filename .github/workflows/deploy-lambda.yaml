@@ -39,7 +39,7 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        pip install flake8 black isort pytest pytest-cov coverage
+        pip install flake8 black isort boto3 pytest pytest-cov coverage
         sudo apt-get update
         sudo apt-get install -y jq
 
