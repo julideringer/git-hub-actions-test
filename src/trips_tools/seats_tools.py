@@ -16,7 +16,7 @@ def required_seats_function(required_seats, remaining_seats, reserved_seats):
             ":val3": trip_available
         }
         return {"success": True, "data": [update_expression, expression_attribute_values]}
-    return {"success": False, "error_message": "unavailable number of required seats", "data": None}
+    return {"success": False, "message": "unavailable number of required seats", "data": None}
 
 def get_updated_seats(total_reserved_seats, remaining_seats, reserved_seats):
     """function to determine if there free seats or not"""

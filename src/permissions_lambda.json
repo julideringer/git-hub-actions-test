@@ -31,6 +31,22 @@
         }
       ]
     },
+    "trip_lambda_gettrip": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3:Describe*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
     "routines_lambda_myroutines": {
       "Version": "2012-10-17",
       "Statement": [
@@ -121,7 +137,7 @@
         }
       ]
     },
-    "trip_lambda_publish": {
+    "trip_lambda_publication": {
       "Version": "2012-10-17",
       "Statement": [
         {
@@ -197,6 +213,21 @@
       ]
     },
     "trip_lambda_suggestions": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:Get*",
+            "s3:List*",
+            "s3-object-lambda:Get*",
+            "s3-object-lambda:List*"
+          ],
+          "Resource": "*"
+        }
+      ]
+    },
+    "trip_lambda_search": {
       "Version": "2012-10-17",
       "Statement": [
         {

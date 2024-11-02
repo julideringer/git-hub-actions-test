@@ -5,9 +5,10 @@ from geopy.distance import geodesic
 import boto3
 from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
-from src.trips_tools.get_user_info import get_user_info_from_trips
-from src.trips_tools.parser_tools import response_trip_parser
-from src.common_tools.payload_parser import error_return_parser, success_return_parser
+from trips_tools.parser_tools import response_trip_parser
+from common_tools.get_user_info import get_user_info_from_trips
+from common_tools.payload_parser import error_return_parser, success_return_parser
+from common_tools.payload_parser import dict_parser_to_camel_case
 
 trips_table = boto3.resource("dynamodb").Table("trips")
 
@@ -51,12 +52,13 @@ def lambda_handler(event, context= None):
         trips_order_distance = add_distance(items_sorted, event["body-json"]["latitudDeparture"],
                                                  event["body-json"]["longitudDeparture"], distancia)
         if len(trips_order_distance) == 0:
-            return success_return_parser(None, {"trips_searched": trips_order_distance})
+            return success_return_parser("No trip found", trips_order_distance)
         trips = get_user_info_from_trips(trips_order_distance)
         for trip in trips:
-            parsed_trips.append(deepcopy(response_trip_parser(trip)))
+            parsed_object = dict_parser_to_camel_case(response_trip_parser(trip))
+            parsed_trips.append(deepcopy(parsed_object))
         return success_return_parser(
-            None, {"trips_searched": get_user_info_from_trips(trips_order_distance)})
+            None, parsed_trips)
     except ClientError as error:
         return error_return_parser(error.response["Error"]["Message"],
                                    error.response["Error"]["Code"])

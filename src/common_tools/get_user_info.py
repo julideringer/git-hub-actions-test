@@ -1,4 +1,5 @@
 """function to get user info for a given list of users"""
+from datetime import datetime, date
 from base64 import b64encode
 from copy import deepcopy
 import boto3
@@ -8,7 +9,44 @@ USERS_TABLE = 'users'
 users_table = boto3.resource("dynamodb").Table(USERS_TABLE)
 dynamodb = boto3.client("dynamodb")
 s3 = boto3.client('s3')
-print("hola1")
+
+def calculate_age(birthdate):
+    """function to calculate the age of a person"""
+    today = date.today()
+    born = datetime.strptime(birthdate, "%d/%m/%Y")
+    return str(today.year - born.year - ((today.month, today.day) < (born.month, born.day)))
+
+def get_picture_froms3(picture_path):
+    """function to get the picture from s3bucket"""
+    return s3.generate_presigned_url(
+        "get_object", Params = {"Bucket": "mube-s3bucket", "Key": picture_path}, ExpiresIn = 3600)
+
+def get_user_info(user_info) -> dict:
+    """retrieve user info"""
+    user_attributes = {
+        "picture": None,
+        "user_id": None,
+        "name": None,
+        "verified": None,
+        "biography": None,
+        "age": None
+    }
+    if user_info["picture"]:
+        user_attributes["picture"] = get_picture_froms3(user_info["picture"])
+    if user_info["user_id"]:
+        user_attributes["user_id"] = user_info["user_id"]
+    if user_info["verified"]:
+        user_attributes["verified"] = user_info["verified"]
+    if user_info["biography"]:
+        user_attributes["biography"] = user_info["biography"]
+    if user_info["name"]:
+        user_attributes["name"] = user_info["name"]
+        if user_info["last_name"]:
+            user_attributes["name"] += f' {user_info["last_name"]}'
+    if user_info["birthdate"]:
+        user_attributes["age"] = calculate_age(user_info["birthdate"])
+    return user_attributes
+
 def get_user_info_from_trips(trip_list):
     """method to get user info for a set of trips"""
     user_id_list = []

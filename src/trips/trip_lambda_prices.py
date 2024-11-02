@@ -1,6 +1,6 @@
 """lambda function for trip booking"""
 import boto3
-from src.common_tools.payload_parser import success_return_parser, error_return_parser
+from common_tools.payload_parser import success_return_parser, error_return_parser
 
 PRICE_TABLE = 'prices'
 
