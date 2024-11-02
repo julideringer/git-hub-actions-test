@@ -43,9 +43,13 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y jq
 
-    - name: Run Flake8
-      run: | 
-        flake8 src/
+    - name: Run tests
+      run: |
+          initial_directory=$(pwd)
+          cd test  # Cambia al directorio de tests
+          python -m unittest test_trip_lambda_archive.py  # Ejecuta los tests
+          cd "$initial_directory"
+
 
     - name: Create ZIPs for Lambda functions
       run: |
