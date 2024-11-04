@@ -1071,8 +1071,7 @@
           "Effect": "Allow",
           "Action": [
             "s3:Get*",
-            "s3:List*",
-            "s3-object-lambda:List*"
+            "s3:List*"
           ],
           "Resource": "*"
         }
