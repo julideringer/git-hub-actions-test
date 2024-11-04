@@ -81,13 +81,15 @@ jobs:
                     mv lambda_function.py $lambda_file
 
                     # Crea el archivo ZIP incluyendo las dependencias en trips_tools/
-                    zip -r ../${function_name}.zip lambda_function.py ../trips_tools/
+                    if [[ "$dir" == "src/trips" ]]; then
+                        zip -r ../${function_name}.zip lambda_function.py ../trips_tools/
 
-                    # Crea el archivo ZIP incluyendo las dependencias en trips_tools/
+                    # Crea el archivo ZIP incluyendo las dependencias en common_tools/
                     zip -r ../${function_name}.zip lambda_function.py ../common_tools/
 
                     # Crea el archivo ZIP incluyendo las dependencias en routines_tools/
-                    zip -r ../${function_name}.zip lambda_function.py ../routines_tools/
+                    if [[ "$dir" == "routines" ]]; then
+                      zip -r ../${function_name}.zip lambda_function.py ../routines_tools/
                     
                     # Agrega el nombre del ZIP al array
                     zip_files+=("${function_name}.zip")
@@ -120,7 +122,7 @@ jobs:
                     # Crea el archivo ZIP incluyendo las dependencias en trips_tools/
                     zip -r ../${function_name}.zip lambda_function.py ../trips_tools/
 
-                    # Crea el archivo ZIP incluyendo las dependencias en trips_tools/
+                    # Crea el archivo ZIP incluyendo las dependencias en common_tools/
                     zip -r ../${function_name}.zip lambda_function.py ../common_tools/
 
                     # Crea el archivo ZIP incluyendo las dependencias en routines_tools/
@@ -151,7 +153,6 @@ jobs:
               create_zip_files "reservations"
               create_zip_files "signin"
               create_zip_files "signup"
-              create_zip_files "superadmin"
               create_zip_files_subdirectory "users"
               # Imprime los archivos ZIP generados en la carpeta temporal
               echo "Archivos ZIP creados en /tmp/zip_file_lambda:"
@@ -311,9 +312,6 @@ jobs:
               # Verificar y crear funciones Lambda en el directorio 'src/signup'
               check_and_create_lambda "../signup"
 
-              # Verificar y crear funciones Lambda en el directorio 'src/superadmin'
-              check_and_create_lambda "../superadmin"
-
               # Verificar y crear funciones Lambda en el directorio 'src/users'
               check_and_create_lambda "../users"
 
@@ -454,7 +452,7 @@ jobs:
 
     - name: Actualizar diferencias
       run: |
-                            changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(routines|trips|chat|payments|reservations|signin|signup|superadmin|users)/.*\.py$' | uniq)
+                            changed_lambdas=$(git diff --name-only HEAD^ HEAD | grep -E '^src/(routines|trips|chat|payments|reservations|signin|signup|users)/.*\.py$' | uniq)
                             echo "Changed Lambda Files: $changed_lambdas"
 
                             for lambda_file in $changed_lambdas; do
