@@ -1050,7 +1050,7 @@
         }
       ]
     },
-    "trip_lambda_test1": {
+    "trip_lambda_test2": {
       "Version": "2012-10-17",
       "Statement": [
         {
