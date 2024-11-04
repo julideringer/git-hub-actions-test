@@ -355,7 +355,7 @@ jobs:
               extract_actions() {
                   local json=$1
                   local lambda_name=$2
-                  echo "$json" | jq -r --arg name "$lambda_name" '.lambdas[$name].Statement[].Action[]'
+                  echo "$json" | jq -r --arg name "$lambda_name" '.lambdas[$name].Statement[].Action[] // empty'
               }
 
               # Iterar sobre las lambdas en el JSON actual
