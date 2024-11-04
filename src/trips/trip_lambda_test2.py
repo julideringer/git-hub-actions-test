@@ -144,6 +144,7 @@ def auto_reservation(trip_object, reservation_object):
 
 def lambda_handler(event, context):
     """lambda handler"""
+    print("hola")
     payload = event["body-json"]
     if payload["type"] == "payment_intent.payment_failed":
         print("❌ Payment failed.")

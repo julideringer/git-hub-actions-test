@@ -169,6 +169,9 @@ def lambda_handler(event, context):
             "reservated_seats": required_seats, "passenger_id": passenger_id,
             "driver_id": trip_object["driver_id"]
         }
+        print(reservation_object["driver_id"])
+        driver_chats_usss= user_chats_table.get_item(Key={
+        "user_id": '9a4aabde-32f5-40d6-9a7c-9ea2d85c3432'})
         reservation_object["chat_id"] = get_chat_id(reservation_object,
                                                     trip_object["reservation_mode"])
         if trip_object["reservation_mode"] == "manual":
