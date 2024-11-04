@@ -351,10 +351,14 @@ jobs:
               current_json=$(cat "$current_permissions_file")
               previous_json=$(echo "$previous_permissions_json")
 
+              echo "Antes de extraer acciones"
+
               # Función para extraer acciones de una lambda
               extract_actions() {
                   local json=$1
                   local lambda_name=$2
+                  echo "Antes de realizar el jq de json"
+                  echo "muestra la lambda_name $lambda_name"
                   echo "$json" | jq -r --arg name "$lambda_name" '.lambdas[$name].Statement[].Action[] // empty'
               }
 
@@ -362,7 +366,9 @@ jobs:
               for lambda in $(echo "$current_json" | jq -r '.lambdas | keys[]'); do
                   # Obtener las acciones de la lambda actual y anterior
                   current_actions=$(extract_actions "$current_json" "$lambda")
+                  echo "current_actions: $current_actions"
                   previous_actions=$(extract_actions "$previous_json" "$lambda")
+                  echo "previous_actions: $previous_actions"
 
                   # Comparar las acciones
                   if [ "$current_actions" != "$previous_actions" ]; then
