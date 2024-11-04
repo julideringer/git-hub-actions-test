@@ -83,6 +83,7 @@ jobs:
                     # Crea el archivo ZIP incluyendo las dependencias en trips_tools/
                     if [[ "$dir" == "src/trips" ]]; then
                         zip -r ../${function_name}.zip lambda_function.py ../trips_tools/
+                    fi
 
                     # Crea el archivo ZIP incluyendo las dependencias en common_tools/
                     zip -r ../${function_name}.zip lambda_function.py ../common_tools/
@@ -90,6 +91,7 @@ jobs:
                     # Crea el archivo ZIP incluyendo las dependencias en routines_tools/
                     if [[ "$dir" == "routines" ]]; then
                       zip -r ../${function_name}.zip lambda_function.py ../routines_tools/
+                    fi
                     
                     # Agrega el nombre del ZIP al array
                     zip_files+=("${function_name}.zip")
