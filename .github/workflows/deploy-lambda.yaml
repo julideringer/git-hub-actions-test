@@ -364,15 +364,19 @@ jobs:
 
               # Iterar sobre las lambdas en el JSON actual
               for lambda in $(echo "$current_json" | jq -r '.lambdas | keys[]'); do
-                  # Obtener las acciones de la lambda actual y anterior
-                  current_actions=$(extract_actions "$current_json" "$lambda")
-                  echo "current_actions: $current_actions"
-                  previous_actions=$(extract_actions "$previous_json" "$lambda")
-                  echo "previous_actions: $previous_actions"
-
-                  # Comparar las acciones
-                  if [ "$current_actions" != "$previous_actions" ]; then
+                  # Verificar si la Lambda no existe en el JSON anterior
+                  if ! echo "$previous_json" | jq -e --arg name "$lambda" '.lambdas[$name]' > /dev/null; then
+                      echo "Nueva Lambda detectada: $lambda"
                       changed_lambdas_permission+=("$lambda")
+                  else
+                      # Obtener las acciones de la lambda actual y anterior
+                      current_actions=$(extract_actions "$current_json" "$lambda")
+                      previous_actions=$(extract_actions "$previous_json" "$lambda")
+
+                      # Comparar las acciones
+                      if [ "$current_actions" != "$previous_actions" ]; then
+                          changed_lambdas_permission+=("$lambda")
+                      fi
                   fi
               done
 
